@@ -29,25 +29,7 @@ private:
     AGV_Pos agv_pos;
     float posx = 0, posy = 0, dx = 0, dy = 0, dz = 0;
 
-public:
-    // 串口初始化
-    void Serial_Init()
-    {
-        try
-        {
-
-            se.setPort("/dev/ttyS1");
-            se.setBaudrate(9600);
-            se.setTimeout(to);
-            se.open();
-        }
-        catch (serial::PortNotOpenedException &e)
-        {
-            ROS_INFO_STREAM("打开串口失败");
-        }
-    }
-
-    int Read_Data(uint8_t resBuff[], int buff_size)
+    void Read_Data(uint8_t resBuff[], int buff_size)
     {
         if (se.available())
         {
@@ -83,9 +65,26 @@ public:
         }
     }
 
+public:
+    // 串口初始化
+    void Serial_Init(char port[])
+    {
+        try
+        {
+            se.setPort("/dev/ttyS1");
+            se.setBaudrate(9600);
+            se.setTimeout(to);
+            se.open();
+        }
+        catch (serial::PortNotOpenedException &e)
+        {
+            ROS_INFO_STREAM("打开串口失败");
+        }
+    }
+    
+    //获取串口数据并转化
     bool Get_Data()
     {
-        short transition_16 = 0;                                 // 中间变量
         uint8_t i = 0, check = 0, error = 1, Receive_Data_Pr[1]; // 临时变量，保存下位机数据
         static int count = 0;                                    // 静态变量，用于计数
         Read_Data(Receive_Data_Pr, sizeof(Receive_Data_Pr));     // 通过串口读取下位机发送过来的数据
@@ -94,22 +93,23 @@ public:
             count++;
         else
             count = 0;
-        if (count == 8) // 验证数据包的长度
+        if (count == 15) // 验证数据包的长度
         {
             serial_Res_Data.data.Data_Header = serial_Res_Data.buffer[0];
             serial_Res_Data.data.Data_Tail = serial_Res_Data.buffer[14];
             count = 0;                                  // 为串口数据重新填入数组做准备
             if (serial_Res_Data.data.Data_Tail == TAIL) // 验证数据包的帧尾
             {
-                agv_vel.X = serial_Res_Data.data.X_speed.f_data/1000; // 获取运动底盘X方向速度,并除以1000换算为m/s
-                agv_vel.Y = serial_Res_Data.data.Y_speed.f_data/1000;// 获取运动底盘Y方向速度
-                agv_vel.Z = serial_Res_Data.data.Z_speed.f_data/1000; // 获取运动底盘Z方向速度
+                agv_vel.X = serial_Res_Data.data.X_speed.f_data / 1000; // 获取运动底盘X方向速度,并除以1000换算为m/s
+                agv_vel.Y = serial_Res_Data.data.Y_speed.f_data / 1000; // 获取运动底盘Y方向速度
+                agv_vel.Z = serial_Res_Data.data.Z_speed.f_data / 1000; // 获取运动底盘Z方向速度
+                ROS_INFO("agv速度为x=%.3f y=%.3f z=%.3f", agv_vel.X, agv_vel.Y, agv_vel.Z);
                 return true;
             }
         }
         return false;
     }
-
+    //发布odom数据
     void Publish_Odom()
     {
         // 定义tf 对象
@@ -171,17 +171,12 @@ int main(int argc, char *argv[])
     STM32_Serial stm32_Serial;
     ros::init(argc, argv, "serial_port");
     ros::NodeHandle n;
-    ros::Publisher odom_pub = n.advertise<nav_msgs::Odometry>("odom", 50);
-    ros::Rate rate(10); // 一秒执行十次
-    serial::Serial se;
-    serial::Timeout to = serial::Timeout::simpleTimeout(100);
+    ros::Rate rate(100);
+    char port[]="/dev/ttyS1";
+    ROS_INFO("serial node is running");
     try
     {
-
-        se.setPort("/dev/ttyS1");
-        se.setBaudrate(9600);
-        se.setTimeout(to);
-        se.open();
+        stm32_Serial.Serial_Init(port);
     }
     catch (serial::PortNotOpenedException &e)
     {
@@ -191,9 +186,12 @@ int main(int argc, char *argv[])
 
     while (ros::ok())
     {
+        if (stm32_Serial.Get_Data())
+        {
+            stm32_Serial.Publish_Odom();
+        }
         ros::spinOnce();
         rate.sleep();
     }
-    se.close();
     return 0;
 }
