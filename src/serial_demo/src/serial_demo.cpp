@@ -71,18 +71,18 @@ public:
     {
         try
         {
-            se.setPort("/dev/ttyS1");
+            se.setPort(port);
             se.setBaudrate(9600);
             se.setTimeout(to);
             se.open();
         }
-        catch (serial::PortNotOpenedException &e)
+        catch (serial::IOException &e)
         {
             ROS_INFO_STREAM("打开串口失败");
         }
     }
-    
-    //获取串口数据并转化
+
+    // 获取串口数据并转化
     bool Get_Data()
     {
         uint8_t i = 0, check = 0, error = 1, Receive_Data_Pr[1]; // 临时变量，保存下位机数据
@@ -109,7 +109,7 @@ public:
         }
         return false;
     }
-    //发布odom数据
+    // 发布odom数据
     void Publish_Odom()
     {
         // 定义tf 对象
@@ -168,17 +168,20 @@ public:
 
 int main(int argc, char *argv[])
 {
+
+    setlocale(LC_ALL, "");
+    setlocale(LC_CTYPE, "zh_CN.utf8");
     STM32_Serial stm32_Serial;
     ros::init(argc, argv, "serial_port");
     ros::NodeHandle n;
     ros::Rate rate(100);
-    char port[]="/dev/ttyS1";
+    char port[] = "/dev/ttyUSB0";
     ROS_INFO("serial node is running");
     try
     {
         stm32_Serial.Serial_Init(port);
     }
-    catch (serial::PortNotOpenedException &e)
+    catch (serial::IOException &e)
     {
         ROS_INFO_STREAM("打开串口失败");
         return -1;
