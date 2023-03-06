@@ -13,13 +13,15 @@ using namespace std;
 #define TAIL 'E'
 #define PI 3.14159
 
-// 发送和接受串口消息
+// sudo chmod 666 /dev/ttyUSB0
+//  发送和接受串口消息
 char serialReqData[64];
 uint8_t data3[10];
 Data_Transer serial_Res_Data;
-
+unsigned char a[] = {'A'};
+unsigned char b[] = {'B'};
 // uint8_t=unsigned char等价关系
-
+// # TODO 需要完成trigger后再让32发送数据的代码
 class STM32_Serial
 {
 private:
@@ -31,19 +33,30 @@ private:
 
     void Read_Data(uint8_t resBuff[], int buff_size)
     {
+        uint8_t ccbuff[64];
         if (se.available())
         {
-            std_msgs::String res;
-            resBuff[buff_size];
             try
             {
-                se.read(resBuff, se.available());
+                se.read(ccbuff, se.available());
+                for (size_t i = 0; i < 64; i++)
+                {
+                    if (ccbuff[i] == HEADER)
+                    {
+                        for (size_t j = 0; j < 1; j++)
+                        {
+                            resBuff[j] = ccbuff[i + j];
+                        }
+                    }
+                }
+                // ROS_INFO_STREAM(ccbuff);
             }
             catch (serial::IOException &e)
             {
                 ROS_ERROR_STREAM("数据接收失败");
             }
         }
+        memset(ccbuff, 0x00, 64);
     }
 
     void Odom_Trans(uint8_t data[])
@@ -65,9 +78,18 @@ private:
         }
     }
 
+    void Speed_Init()
+    {
+        se.write(a, sizeof(a));
+    }
+    void Speed_Stop()
+    {
+        se.write(b, sizeof(b));
+    }
+
 public:
     // 串口初始化
-    void Serial_Init(char port[])
+    int Serial_Init(char port[])
     {
         try
         {
@@ -75,37 +97,41 @@ public:
             se.setBaudrate(9600);
             se.setTimeout(to);
             se.open();
+            Speed_Init();
+            ROS_INFO("打开串口成功");
+            return 1;
         }
         catch (serial::IOException &e)
         {
-            ROS_INFO_STREAM("打开串口失败");
+            ROS_ERROR("打开串口失败");
+            return -1;
         }
     }
 
     // 获取串口数据并转化
     bool Get_Data()
     {
-        uint8_t i = 0, check = 0, error = 1, Receive_Data_Pr[1]; // 临时变量，保存下位机数据
-        static int count = 0;                                    // 静态变量，用于计数
-        Read_Data(Receive_Data_Pr, sizeof(Receive_Data_Pr));     // 通过串口读取下位机发送过来的数据
-        serial_Res_Data.buffer[count] = Receive_Data_Pr[0];
-        if (Receive_Data_Pr[0] == HEADER || count > 0) // 确保数组第一个数据为FRAME_HEADER
-            count++;
-        else
-            count = 0;
-        if (count == 15) // 验证数据包的长度
+        static int count = 0;                                              // 静态变量，用于计数
+        Read_Data(serial_Res_Data.buffer, sizeof(serial_Res_Data.buffer)); // 通过串口读取下位机发送过来的数据
+        uint8_t CRC = 0x00;
+        if (serial_Res_Data.buffer[0] == HEADER && serial_Res_Data.buffer[15] == TAIL) // 验证数据包的帧尾
         {
-            serial_Res_Data.data.Data_Header = serial_Res_Data.buffer[0];
-            serial_Res_Data.data.Data_Tail = serial_Res_Data.buffer[14];
-            count = 0;                                  // 为串口数据重新填入数组做准备
-            if (serial_Res_Data.data.Data_Tail == TAIL) // 验证数据包的帧尾
+            for (size_t i = 0; i < 14; i++)
             {
-                agv_vel.X = serial_Res_Data.data.X_speed.f_data / 1000; // 获取运动底盘X方向速度,并除以1000换算为m/s
-                agv_vel.Y = serial_Res_Data.data.Y_speed.f_data / 1000; // 获取运动底盘Y方向速度
-                agv_vel.Z = serial_Res_Data.data.Z_speed.f_data / 1000; // 获取运动底盘Z方向速度
-                ROS_INFO("agv速度为x=%.3f y=%.3f z=%.3f", agv_vel.X, agv_vel.Y, agv_vel.Z);
-                return true;
+                CRC = serial_Res_Data.buffer[i] ^ CRC;
             }
+            ROS_INFO("校验码为%x", CRC);
+            ROS_INFO("%x", serial_Res_Data.buffer[14]);
+            // if (CRC == serial_Res_Data.buffer[14])
+            // {
+            agv_vel.X = serial_Res_Data.data.X_speed.f_data / 1000; // 获取运动底盘X方向速度,并除以1000换算为m/s
+            agv_vel.Y = serial_Res_Data.data.Y_speed.f_data / 1000; // 获取运动底盘Y方向速度
+            agv_vel.Z = serial_Res_Data.data.Z_speed.f_data / 1000; // 获取运动底盘Z方向速度
+            ROS_INFO("agv速度为x=%.3f y=%.3f z=%.3f", agv_vel.X, agv_vel.Y, agv_vel.Z);
+            se.flush();
+            CRC = 0x00;
+            return true;
+            // }
         }
         return false;
     }
@@ -174,21 +200,18 @@ int main(int argc, char *argv[])
     STM32_Serial stm32_Serial;
     ros::init(argc, argv, "serial_port");
     ros::NodeHandle n;
-    ros::Rate rate(100);
+    ros::Rate rate(10);
     char port[] = "/dev/ttyUSB0";
     ROS_INFO("serial node is running");
-    try
+
+    if (stm32_Serial.Serial_Init(port) == -1)
     {
-        stm32_Serial.Serial_Init(port);
-    }
-    catch (serial::IOException &e)
-    {
-        ROS_INFO_STREAM("打开串口失败");
         return -1;
     }
 
     while (ros::ok())
     {
+        stm32_Serial.Get_Data();
         if (stm32_Serial.Get_Data())
         {
             stm32_Serial.Publish_Odom();

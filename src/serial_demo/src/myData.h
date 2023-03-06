@@ -5,7 +5,7 @@ typedef union _uart_Float_
 } uart_Float;
 typedef struct _Data_Transer_
 {
-    unsigned char buffer[64];
+    unsigned char buffer[32];
     struct _Data_
     {
         unsigned char Data_Header;
