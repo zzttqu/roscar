@@ -12,16 +12,16 @@ using namespace std;
 #define HEADER 'S'
 #define TAIL 'E'
 #define PI 3.14159
+#define active_code 'I'
+#define deactive_code 'S'
 
 // sudo chmod 666 /dev/ttyUSB0
 //  发送和接受串口消息
-char serialReqData[64];
-uint8_t data3[10];
-Data_Transer serial_Res_Data;
-unsigned char a[] = {'A'};
-unsigned char b[] = {'B'};
+Data_Reciever serial_Res_Data;
+Data_Sender serial_Send_Data;
+unsigned char STM32_Settings[16] = {'A'};
 // uint8_t=unsigned char等价关系
-// # TODO 需要完成trigger后再让32发送数据的代码
+// # TODO 完成设置代码
 class STM32_Serial
 {
 private:
@@ -43,7 +43,7 @@ private:
                 {
                     if (ccbuff[i] == HEADER)
                     {
-                        for (size_t j = 0; j < 1; j++)
+                        for (size_t j = 0; j < 16; j++)
                         {
                             resBuff[j] = ccbuff[i + j];
                         }
@@ -65,26 +65,54 @@ private:
         {
             if (i < 6)
             {
-                serial_Res_Data.data.X_speed.byte[(i - 2) % 4] = serial_Res_Data.buffer[i];
+                serial_Res_Data.X_speed.byte[(i - 2) % 4] = serial_Res_Data.buffer[i];
             }
             else if (5 < i && i < 10)
             {
-                serial_Res_Data.data.Y_speed.byte[(i - 2) % 4] = serial_Res_Data.buffer[i];
+                serial_Res_Data.Y_speed.byte[(i - 2) % 4] = serial_Res_Data.buffer[i];
             }
             else if (9 < i && i < 14)
             {
-                serial_Res_Data.data.Z_speed.byte[(i - 2) % 4] = serial_Res_Data.buffer[i];
+                serial_Res_Data.Z_speed.byte[(i - 2) % 4] = serial_Res_Data.buffer[i];
             }
         }
     }
-
-    void Speed_Init()
+    // STM32设置
+    void STM32_Set()
     {
-        se.write(a, sizeof(a));
+        STM32_Settings[1] = 'I';
+        se.write(STM32_Settings, sizeof(STM32_Settings));
     }
-    void Speed_Stop()
+
+    void Speed_Trans()
     {
-        se.write(b, sizeof(b));
+        serial_Send_Data.Data_Header = 'S';
+        serial_Send_Data.Data_Tail = 'E';
+        memset(serial_Send_Data.buffer, 0x00, sizeof(serial_Send_Data.buffer));
+
+        // 导航的速度数据切分后传入
+        // 赋值到buffer中进行传输，四bit为一个float
+        serial_Send_Data.buffer[0] = serial_Send_Data.Data_Header;
+        for (size_t i = 2; i < 14; i++)
+        {
+            if (i < 6)
+            {
+                serial_Send_Data.buffer[i] = serial_Send_Data.X_speed.byte[(i - 2) % 4];
+            }
+            else if (5 < i && i < 10)
+            {
+                serial_Send_Data.buffer[i] = serial_Send_Data.Y_speed.byte[(i - 2) % 4];
+            }
+            else if (9 < i && i < 14)
+            {
+                serial_Send_Data.buffer[i] = serial_Send_Data.Z_speed.byte[(i - 2) % 4];
+            }
+        }
+        for (size_t i = 0; i < 14; i++)
+        {
+            serial_Send_Data.buffer[14]=serial_Send_Data.buffer[i]^serial_Send_Data.buffer[14];
+        }
+        serial_Send_Data.buffer[15]=serial_Send_Data.Data_Tail;
     }
 
 public:
@@ -97,13 +125,33 @@ public:
             se.setBaudrate(9600);
             se.setTimeout(to);
             se.open();
-            Speed_Init();
+            STM32_Set();
             ROS_INFO("打开串口成功");
             return 1;
         }
         catch (serial::IOException &e)
         {
             ROS_ERROR("打开串口失败");
+            return -1;
+        }
+    }
+
+    // 发送速度信息
+    int Send_Speed_Msg()
+    {
+        try
+        {
+            if(se.isOpen()){
+                se.write(serial_Send_Data.buffer,sizeof(serial_Send_Data));
+            }
+            else{
+               ROS_ERROR("串口未打开，无法发送信息"); 
+            }  
+            return 1;
+        }
+        catch(const serial::IOException e)
+        {
+            ROS_ERROR(e.what());
             return -1;
         }
     }
@@ -124,9 +172,9 @@ public:
             ROS_INFO("%x", serial_Res_Data.buffer[14]);
             // if (CRC == serial_Res_Data.buffer[14])
             // {
-            agv_vel.X = serial_Res_Data.data.X_speed.f_data / 1000; // 获取运动底盘X方向速度,并除以1000换算为m/s
-            agv_vel.Y = serial_Res_Data.data.Y_speed.f_data / 1000; // 获取运动底盘Y方向速度
-            agv_vel.Z = serial_Res_Data.data.Z_speed.f_data / 1000; // 获取运动底盘Z方向速度
+            agv_vel.X = serial_Res_Data.X_speed.f_data / 1000; // 获取运动底盘X方向速度,并除以1000换算为m/s
+            agv_vel.Y = serial_Res_Data.Y_speed.f_data / 1000; // 获取运动底盘Y方向速度
+            agv_vel.Z = serial_Res_Data.Z_speed.f_data / 1000; // 获取运动底盘Z方向速度
             ROS_INFO("agv速度为x=%.3f y=%.3f z=%.3f", agv_vel.X, agv_vel.Y, agv_vel.Z);
             se.flush();
             CRC = 0x00;
@@ -211,7 +259,6 @@ int main(int argc, char *argv[])
 
     while (ros::ok())
     {
-        stm32_Serial.Get_Data();
         if (stm32_Serial.Get_Data())
         {
             stm32_Serial.Publish_Odom();
