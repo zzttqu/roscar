@@ -53,13 +53,13 @@ private:
             }
             catch (serial::IOException &e)
             {
-                ROS_ERROR_STREAM("数据接收失败");
+                ROS_ERROR_STREAM("数据接收失败 "<<e.what());
             }
         }
         memset(ccbuff, 0x00, 64);
     }
 
-    void Odom_Trans(uint8_t data[])
+    void Recieve_Speed_Trans(uint8_t data[])
     {
         for (size_t i = 2; i < 14; i++)
         {
@@ -168,8 +168,8 @@ public:
             {
                 CRC = serial_Res_Data.buffer[i] ^ CRC;
             }
-            ROS_INFO("校验码为%x", CRC);
-            ROS_INFO("%x", serial_Res_Data.buffer[14]);
+            ROS_INFO_STREAM("校验码为"<<CRC);
+            ROS_INFO_STREAM(""<<serial_Res_Data.buffer);
             // if (CRC == serial_Res_Data.buffer[14])
             // {
             agv_vel.X = serial_Res_Data.X_speed.f_data / 1000; // 获取运动底盘X方向速度,并除以1000换算为m/s
