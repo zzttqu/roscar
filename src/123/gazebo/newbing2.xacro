@@ -1,0 +1,64 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="mecanum_wheel">
+  <!-- 定义麦克纳姆轮的尺寸和颜色 -->
+  <xacro:property name="wheel_radius" value="0.075"/>
+  <xacro:property name="wheel_width" value="0.03"/>
+  <xacro:property name="wheel_color" value="green"/>
+
+  <!-- 定义一个宏，用来生成一个麦克纳姆轮 -->
+  <xacro:macro name="mecanum_wheel" params="name parent reflect">
+    <!-- 定义一个关节，用来连接父链接和轮子 -->
+    <joint name="${name}_joint" type="continuous">
+      <parent link="${parent}"/>
+      <child link="${name}"/>
+      <!-- 根据反射参数，设置关节的位置和方向 -->
+      <origin xyz="${reflect * wheel_width / 2} 0 ${-wheel_radius}" rpy="0 ${reflect * pi / 2} ${reflect * pi / 2}"/>
+      <!-- 设置关节的转动轴 -->
+      <axis xyz="${-reflect} 0 0"/>
+    </joint>
+    <!-- 定义一个链接，用来表示轮子 -->
+    <link name="${name}">
+      <!-- 设置轮子的惯性参数 -->
+      <inertial>
+        <mass value="1"/>
+        <origin xyz="0 0 0"/>
+        <inertia ixx="${1/12 * wheel_width**2 + wheel_radius**2}" ixy="0" ixz="0"
+                 iyy="${1/12 * wheel_width**2 + wheel_radius**2}" iyz="0"
+                 izz="${1/2 * wheel_width**2}"/>
+      </inertial>
+      <!-- 设置轮子的可视化属性 -->
+      <visual>
+        <!-- 使用cylinder作为几何形状 -->
+        <geometry>
+          <cylinder length="${wheel_width}" radius="${wheel_radius}"/>
+        </geometry>
+        <!-- 设置原点和材质 -->
+        <origin rpy="-${pi / 2} ${pi /4 } -${pi /4 }"/> 
+        <material name="${wheel_color}">
+          <color rgba="${wheel_color} 1.0"/> 
+        </material>
+      </visual>
+      <!-- 设置轮子的碰撞属性，与可视化属性相同 -->
+      <collision>
+        <geometry>
+          <cylinder length="${wheel_width}" radius="${wheel_radius}"/>
+        </geometry>
+        <origin rpy="-${pi / 2} ${pi /4 } -${pi /4 }"/> 
+      </collision>
+    </link>
+
+    <!-- 定义gazebo插件，用来控制麦克纳姆轮的运动 -->
+
+     <!--<gazebo reference="{name}">
+       TODO: add gazebo plugin here
+     </gazebo>-->
+    
+   </xacro:macro>
+
+   <!-- 使用宏生成四个麦克纳姆轮，并指定名称、父链接和反射参数 -->
+
+   <!--<xacro:mecanum_wheel name="{left_front_wheel}" parent="{base_link}" reflect="{1}/>
+     TODO: add other wheels here
+   -->
+
+</robot>

@@ -1,0 +1,89 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+  <!-- 定义一些常量 -->
+  <xacro:property name="wheel_radius" value="0.075"/>
+  <xacro:property name="wheel_mass" value="0.25"/>
+  <xacro:property name="wheel_width" value="0.05"/>
+  <xacro:property name="wheel_inertia" value="${wheel_mass * wheel_radius * wheel_radius / 2}"/>
+
+  <!-- 定义一个宏，用于创建一个麦克纳姆轮 -->
+  <xacro:macro name="mecanum_wheel" params="prefix">
+    <link name="${prefix}_wheel_link">
+      <visual>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry>
+          <cylinder radius="${wheel_radius}" length="${wheel_width}"/>
+        </geometry>
+        <material name="black"/>
+      </visual>
+      <collision>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry>
+          <cylinder radius="${wheel_radius}" length="${wheel_width}"/>
+        </geometry>
+      </collision>
+      <inertial>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <mass value="${wheel_mass}"/>
+        <inertia ixx="${wheel_inertia}" ixy="0.0" ixz="0.0"
+                 iyy="${wheel_inertia}" iyz="0.0"
+                 izz="${wheel_inertia}"/>
+      </inertial>
+    </link>
+
+    <!-- 添加一个关节，用于将轮子连接到底盘 -->
+    <!-- 根据你的底盘链接，你可能需要调整原点和轴的位置 -->
+    <joint name="${prefix}_wheel_joint" type="continuous">
+      <parent link="base_link"/>
+      <child link="${prefix}_wheel_link"/>
+      <!-- 根据你的底盘链接的尺寸，改变原点xyz的值 -->
+      <!-- 根据你的轮子的方向，改变轴xyz的值 -->
+      <origin xyz="-${base_length/2} ${base_width/2} -${base_height/2}" rpy="1.57 -1.57 -1.57"/>
+      <axis xyz="-1 -1 -1"/>
+    </joint>
+
+    <!-- 添加一个传动装置，用于驱动轮子关节 -->
+    <!-- 根据你的控制器，你可能需要调整硬件接口和关节名称 -->
+    <transmission name="${prefix}_transmission">
+      <type>transmission_interface/SimpleTransmission</type>
+      <joint name="${prefix}_wheel_joint">
+        <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+      </joint>
+      <!-- 根据你的电机驱动器，改变执行器名称 -->
+      <!-- 根据你的齿轮比，改变机械减速比 -->
+      <actuator name="${pre fix}_motor">
+        <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+        <!-- 如果你有不同的齿轮比，请改变这个值 -->
+        <mechanicalReduction>1</mechanicalReduction>
+      </actuator>
+    </transmission>
+
+    <!-- 添加一个gazebo插件，用于模拟轮子关节 -->
+    <!-- 根据你的仿真设置，你可能需要调整插件参数 -->
+    <!-- 参见http://gazebosim.org/tutorials?tut=ros_gzplugins了解更多细节 -->
+    <gazebo reference="${prefix}_wheel_link">
+      <!-- 如果你有不同的摩擦系数，请改变这个值 -->
+      <!-- 参见http://gazebosim.org/tutorials?tut=ros_gzplugins#DifferentialDrivePlugin了解更多细节 -->
+      <plugin name="${prefix}_wheel_controller" filename="libgazebo_ros_planar_move.so">
+        <!-- 如果你有不同的机器人命名空间，请改变这个值 -->
+        <robotNamespace>/mecanum</robotNamespace>
+        <!-- 如果你有不同的命令话题，请改变这个值 -->
+        <commandTopic>cmd_vel</commandTopic>
+        <!-- 如果你有不同的里程计话题，请改变这个值 -->
+        <odometryTopic>odom</odometryTopic>
+        <!-- 如果你有不同的里程计框架，请改变这个值 -->
+        <odometryFrame>odom</odometryFrame>
+        <!-- 如果你有不同的机器人底盘框架，请改变这个值 -->
+        <robotBaseFrame>base_link</robotBaseFrame>
+        <!-- 如果你有不同的更新率，请改变这个值 -->
+        <updateRate>100.0</updateRate>
+      </plugin>
+    </gazebo>
+  </xacro:macro>
+
+  <!-- 使用宏来创建四个麦克纳姆轮 -->
+  <xacro:mecanum_wheel prefix="front_left"/>
+  <xacro:mecanum_wheel prefix="front_right"/>
+  <xacro:mecanum_wheel prefix="rear_left"/>
+  <xacro:mecanum_wheel prefix="rear_right"/>
+</robot>
