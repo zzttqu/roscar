@@ -16,10 +16,10 @@
     </xacro:macro>
  
     <!-- 每一个驱动轮都需要配置传动装置 -->
-    <xacro:joint_trans joint_name="LeftFrontwheelToBase" />
-    <xacro:joint_trans joint_name="LeftBackwheelToBase" />
-    <xacro:joint_trans joint_name="RightFrontwheelToBase" />
-    <xacro:joint_trans joint_name="RightBackwheelToBase" />
+    <xacro:joint_trans joint_name="wheel_left_front_link" />
+    <xacro:joint_trans joint_name="wheel_left_back_link" />
+    <xacro:joint_trans joint_name="wheel_right_front_link" />
+    <xacro:joint_trans joint_name="wheel_right_back_link" />
  
     <!-- 麦轮控制器 -->
     <gazebo>
@@ -27,12 +27,12 @@
             <commandTopic>cmd_vel</commandTopic>
             <odometryTopic>odom</odometryTopic>
             <odometryFrame>odom</odometryFrame>
-            <leftFrontJoint>LeftFrontwheelToBase</leftFrontJoint>
-            <rightFrontJoint>RightFrontwheelToBase</rightFrontJoint>
-            <leftRearJoint>LeftBackwheelToBase</leftRearJoint>
-            <rightRearJoint>RightBackwheelToBase</rightRearJoint>
+            <leftFrontJoint>wheel_left_front_link</leftFrontJoint>
+            <rightFrontJoint>wheel_right_front_link</rightFrontJoint>
+            <leftRearJoint>wheel_left_back_link</leftRearJoint>
+            <rightRearJoint>wheel_right_back_link</rightRearJoint>
             <odometryRate>100</odometryRate>
-            <robotBaseFrame>base_footprint</robotBaseFrame>
+            <robotBaseFrame>base_link</robotBaseFrame>
             <broadcastTF>1</broadcastTF>
         </plugin>
     </gazebo>
