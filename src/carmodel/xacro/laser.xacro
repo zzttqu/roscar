@@ -1,0 +1,59 @@
+<robot name="my_sensors" xmlns:xacro="http://wiki.ros.org/xacro">
+
+    <!-- 雷达 -->
+    <gazebo reference="radar_link">
+      <sensor type="ray" name="rplidar">
+        <!-- 坐标是0 z x-->
+        <pose>0 0 0 0 0 0</pose>
+        <visualize>true</visualize>
+        <update_rate>5.5</update_rate>
+        <ray>
+          <scan>
+            <horizontal>
+              <samples>360</samples>
+              <resolution>1</resolution>
+              <min_angle>-3</min_angle>
+              <max_angle>3</max_angle>
+            </horizontal>
+          </scan>
+          <range>
+            <min>0.10</min>
+            <max>30.0</max>
+            <resolution>0.01</resolution>
+          </range>
+          <noise>
+            <type>gaussian</type>
+            <mean>0.0</mean>
+            <stddev>0.01</stddev>
+          </noise>
+        </ray>
+        <plugin name="gazebo_rplidar" filename="libgazebo_ros_laser.so">
+          <topicName>/scan</topicName>
+          <frameName>radar_link</frameName>
+        </plugin>
+      </sensor>
+    </gazebo>
+  
+  </robot>
+  
+
+<!-- 
+
+
+    激光雷达插件 
+    <gazebo reference="${prefix}_laser_link">
+      	<sensor type='ray' name='ray_sensor'>
+        	<pose>0 -${laser_z_offset + laser_z_mount_offset + laser_z_mount_size /2 } -${laser_x_offset + laser_x_mount_offset + laser_x_mount_size /2 } -${laser_pitch_angle + pi /2 } -${laser_yaw_angle + pi /2 } -${laser_roll_angle}</pose>
+        	<visualize>${visualize_laserscan}</visualize>
+        	<update_rate>${update_rate}</update_rate>
+        	<ray>
+          		<scan>
+            		<horizontal>
+              			<samples>${samples}</samples>
+              			<resolution>${resolution}</resolution>
+              			<min_angle>${min_angle}</min_angle> 
+              			<max_angle>${max_angle}</max_angle> 
+            		</horizontal> 
+          		</scan> 
+          	
+          	<range> -->
