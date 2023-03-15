@@ -53,7 +53,7 @@ private:
             }
             catch (serial::IOException &e)
             {
-                ROS_ERROR_STREAM("数据接收失败 "<<e.what());
+                ROS_ERROR_STREAM("数据接收失败 " << e.what());
             }
         }
         memset(ccbuff, 0x00, 64);
@@ -110,9 +110,9 @@ private:
         }
         for (size_t i = 0; i < 14; i++)
         {
-            serial_Send_Data.buffer[14]=serial_Send_Data.buffer[i]^serial_Send_Data.buffer[14];
+            serial_Send_Data.buffer[14] = serial_Send_Data.buffer[i] ^ serial_Send_Data.buffer[14];
         }
-        serial_Send_Data.buffer[15]=serial_Send_Data.Data_Tail;
+        serial_Send_Data.buffer[15] = serial_Send_Data.Data_Tail;
     }
 
 public:
@@ -141,15 +141,17 @@ public:
     {
         try
         {
-            if(se.isOpen()){
-                se.write(serial_Send_Data.buffer,sizeof(serial_Send_Data));
+            if (se.isOpen())
+            {
+                se.write(serial_Send_Data.buffer, sizeof(serial_Send_Data));
             }
-            else{
-               ROS_ERROR("串口未打开，无法发送信息"); 
-            }  
+            else
+            {
+                ROS_ERROR("串口未打开，无法发送信息");
+            }
             return 1;
         }
-        catch(const serial::IOException e)
+        catch (const serial::IOException e)
         {
             ROS_ERROR(e.what());
             return -1;
@@ -168,8 +170,8 @@ public:
             {
                 CRC = serial_Res_Data.buffer[i] ^ CRC;
             }
-            ROS_INFO_STREAM("校验码为"<<CRC);
-            ROS_INFO_STREAM(""<<serial_Res_Data.buffer);
+            ROS_INFO_STREAM("校验码为" << CRC);
+            ROS_INFO_STREAM("" << serial_Res_Data.buffer);
             // if (CRC == serial_Res_Data.buffer[14])
             // {
             agv_vel.X = serial_Res_Data.X_speed.f_data / 1000; // 获取运动底盘X方向速度,并除以1000换算为m/s
@@ -238,8 +240,15 @@ public:
         pub_odom.publish(odom); // Pub odometer topic //发布里程计话题
         ros::spinOnce();
     }
+    // 接收导航传入的速度数据
 };
-
+void V_CallBack(const geometry_msgs::Twist& msg)
+{
+    int X=msg.linear.x*1000;
+    int Y=msg.linear.y*1000;
+    int Z=msg.linear.z*1000;
+    ROS_INFO_STREAM("X速度为"<<X<<"Y速度为"<<Y<<"Z转动速度为"<<Z);
+}
 int main(int argc, char *argv[])
 {
 
@@ -251,11 +260,11 @@ int main(int argc, char *argv[])
     ros::Rate rate(10);
     char port[] = "/dev/ttyUSB0";
     ROS_INFO("serial node is running");
-
-    if (stm32_Serial.Serial_Init(port) == -1)
-    {
-        return -1;
-    }
+    ros::Subscriber velocityCMD = n.subscribe("/cmd_vel", 1000, V_CallBack);
+    // if (stm32_Serial.Serial_Init(port) == -1)
+    // {
+    //     return -1;
+    // }
 
     while (ros::ok())
     {
