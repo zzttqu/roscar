@@ -13,5 +13,5 @@
       name="rviz"
       pkg="rviz"
       type="rviz"
-      args="-d $(find carmodel)/config/modeldisplay.rviz" />
+      args="-d $(find carmodel)/config/amcl.rviz" />
   </launch>

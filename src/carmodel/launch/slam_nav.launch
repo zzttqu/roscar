@@ -1,0 +1,8 @@
+<launch>
+    <!-- 启动SLAM节点 -->
+    <include file="$(find carmodel)/launch/gmapping.launch" />
+    <!-- 运行move_base节点 -->
+    <include file="$(find carmodel)/launch/amcl.launch"></include>
+    <include file="$(find carmodel)/launch/navigation.launch"></include>
+    <include file="$(find carmodel)/launch/rviz.launch"></include>
+</launch>

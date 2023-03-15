@@ -1,0 +1,6 @@
+<launch>
+    <include file="$(find carmodel)/launch/mapserver.launch"></include>
+    <include file="$(find carmodel)/launch/amcl.launch"></include>
+    <include file="$(find carmodel)/launch/navigation.launch"></include>
+    <include file="$(find carmodel)/launch/rviz.launch"></include>
+</launch>
