@@ -244,10 +244,11 @@ public:
 };
 void V_CallBack(const geometry_msgs::Twist& msg)
 {
-    int X=msg.linear.x*1000;
-    int Y=msg.linear.y*1000;
+    float X=msg.linear.x*1000;
+    float Y=msg.linear.y*1000;
     int Z=msg.linear.z*1000;
-    ROS_INFO_STREAM("X速度为"<<X<<"Y速度为"<<Y<<"Z转动速度为"<<Z);
+    double Yaw=msg.angular.z; //这个是rad/s
+    ROS_INFO_STREAM("X速度为"<<X<<"Y速度为"<<Y<<"Z转动速度为"<<Yaw);
 }
 int main(int argc, char *argv[])
 {
