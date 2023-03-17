@@ -1,12 +1,11 @@
 #include <ros/ros.h>
 #include "serial/serial.h"
-#include <std_msgs/String.h>
 #include <string>
 #include <iostream>
-#include <sstream>
 #include "myData.h"
 #include <tf/transform_broadcaster.h>
 #include <nav_msgs/Odometry.h>
+#include <cmath>
 using namespace std;
 
 #define HEADER 'S'
@@ -14,7 +13,7 @@ using namespace std;
 #define PI 3.14159
 #define active_code 'I'
 #define deactive_code 'S'
-
+#define wheel_r_mm 150
 // sudo chmod 666 /dev/ttyUSB0
 //  发送和接受串口消息
 Data_Reciever serial_Res_Data;
@@ -242,14 +241,38 @@ public:
     }
     // 接收导航传入的速度数据
 };
-void V_CallBack(const geometry_msgs::Twist& msg)
+void V_CallBack(const geometry_msgs::Twist &msg)
 {
-    float X=msg.linear.x*1000;
-    float Y=msg.linear.y*1000;
-    int Z=msg.linear.z*1000;
-    double Yaw=msg.angular.z; //这个是rad/s
-    ROS_INFO_STREAM("X速度为"<<X<<"Y速度为"<<Y<<"Z转动速度为"<<Yaw);
+    float X = msg.linear.x * 1000;
+    float Y = msg.linear.y * 1000;
+    double Yaw = msg.angular.z; // 这个是rad/s
+    ROS_INFO_STREAM("X速度为" << X << "Y速度为" << Y << "Z转动速度为" << Yaw);
 }
+class Motor_Control
+{
+private:
+    Motor_Parameter MOTOR_Parameters[4];
+    AGV_Vel agv_vel;
+    int wheel_center_x;
+    int wheel_center_y;
+public:
+    void Speed_Trans()
+    {
+        // 运动学解算出四个轮子的线速度
+        MOTOR_Parameters[0].target = agv_vel.X + agv_vel.Y - agv_vel.Z * (wheel_center_x + wheel_center_y);
+        MOTOR_Parameters[1].target = -agv_vel.X + agv_vel.Y - agv_vel.Z * (wheel_center_x + wheel_center_y);
+        MOTOR_Parameters[2].target = agv_vel.X + agv_vel.Y + agv_vel.Z * (wheel_center_x + wheel_center_y);
+        MOTOR_Parameters[3].target = -agv_vel.X + agv_vel.Y + agv_vel.Z * (wheel_center_x + wheel_center_y);
+        for (uint8_t i = 0; i < 4; i++)
+        {
+            // 要先变为角速度值，再转化为preloader数值
+            MOTOR_Parameters[i].preloader = abs(PI * wheel_r_mm * 1000 / MOTOR_Parameters[i].target - 1);
+            // 转向判断
+            MOTOR_Parameters[i].direction_Target=(MOTOR_Parameters[i].target>0)?1:-1;
+        }
+    };
+};
+
 int main(int argc, char *argv[])
 {
 

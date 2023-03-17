@@ -37,3 +37,12 @@ typedef struct _AGV_Pos_
     float Y;
     float Yaw;
 } AGV_Pos;
+
+typedef struct _Motor_Parameter_
+{
+  float target;
+  int preloader;
+  uint8_t direction_Target;
+  float encoder;
+  uint8_t direction_Now;
+} Motor_Parameter;
