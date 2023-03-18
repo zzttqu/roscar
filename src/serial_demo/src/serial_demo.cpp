@@ -17,8 +17,6 @@ using namespace std;
 #define encoder_num 1000
 // sudo chmod 666 /dev/ttyUSB0
 //  发送和接受串口消息
-Data_Reciever serial_Res_Data;
-Data_Sender serial_Send_Data;
 Motor_Parameter MOTOR_Parameters[4];
 unsigned char STM32_Settings[16] = {'A'};
 AGV_Vel agv_nav_vel;
@@ -27,6 +25,37 @@ int wheel_center_x = 250;
 int wheel_center_y = 250;
 // uint8_t=unsigned char等价关系
 // # TODO 完成设置代码
+
+
+
+
+static void Speed_Trans(AGV_Vel agv_vel)
+{
+    // 运动学解算出四个轮子的线速度
+    MOTOR_Parameters[0].target = agv_vel.X + agv_vel.Y - agv_vel.Yaw * (wheel_center_x + wheel_center_y);
+    MOTOR_Parameters[1].target = -agv_vel.X + agv_vel.Y - agv_vel.Yaw * (wheel_center_x + wheel_center_y);
+    MOTOR_Parameters[2].target = agv_vel.X + agv_vel.Y + agv_vel.Yaw * (wheel_center_x + wheel_center_y);
+    MOTOR_Parameters[3].target = -agv_vel.X + agv_vel.Y + agv_vel.Yaw * (wheel_center_x + wheel_center_y);
+    for (uint8_t i = 0; i < 4; i++)
+    {
+        // 要先变为角速度值，再转化为preloader数值
+        MOTOR_Parameters[i].preloader.i_data = (uint8_t)abs(PI * wheel_r_mm * 1000 / MOTOR_Parameters[i].target - 1);
+        // 转向判断
+        MOTOR_Parameters[i].direction_Target = (MOTOR_Parameters[i].target > 0) ? 1 : -1;
+    }
+};
+// 正向运动学解算
+static AGV_Vel Encoder_Trans()
+{
+    AGV_Vel agv_vel;
+    agv_vel.X = (PI * wheel_r_mm / encoder_num *
+                 (MOTOR_Parameters[0].encoder.i_data + MOTOR_Parameters[1].encoder.i_data + MOTOR_Parameters[2].encoder.i_data + MOTOR_Parameters[3].encoder.i_data) / 4);
+    agv_vel.Y = (PI * wheel_r_mm / encoder_num *
+                 (MOTOR_Parameters[0].encoder.i_data - MOTOR_Parameters[1].encoder.i_data + MOTOR_Parameters[2].encoder.i_data - MOTOR_Parameters[3].encoder.i_data) / 4);
+    agv_vel.Yaw = (PI * wheel_r_mm / encoder_num *
+                   (-MOTOR_Parameters[0].encoder.i_data - MOTOR_Parameters[1].encoder.i_data + MOTOR_Parameters[2].encoder.i_data + MOTOR_Parameters[3].encoder.i_data) / 4 / (wheel_center_x + wheel_center_y));
+    return agv_vel;
+}
 class STM32_Serial
 {
 private:
@@ -115,7 +144,7 @@ private:
         memset(Send_Buffer, 0x00, sizeof(Send_Buffer));
         // 导航的速度数据切分后传入
         // 赋值到buffer中进行传输，四bit为一个float
-        Motor_Control::Speed_Trans(agv_nav_vel);
+        Speed_Trans(agv_nav_vel);
         Send_Buffer[0] = HEADER;
         for (size_t i = 2; i < 10; i++)
         {
@@ -135,10 +164,14 @@ private:
             {
                 Send_Buffer[i] = MOTOR_Parameters[3].preloader.byte[(i - 2) % 2];
             }
+            else if (9 < i && i < 14)
+            {
+                Send_Buffer[i] = MOTOR_Parameters[(i - 2) % 4].direction_Target;
+            }
         }
-        for (size_t i = 0; i < 9; i++)
+        for (size_t i = 0; i < 14; i++)
         {
-            Send_Buffer[9] = Send_Buffer[i] ^ Send_Buffer[9];
+            Send_Buffer[14] = Send_Buffer[i] ^ Send_Buffer[14];
         }
         Send_Buffer[11] = TAIL;
     }
@@ -171,7 +204,7 @@ public:
         {
             if (se.isOpen())
             {
-                se.write(serial_Send_Data.buffer, sizeof(serial_Send_Data));
+                se.write(Send_Buffer, sizeof(Send_Buffer));
             }
             else
             {
@@ -181,7 +214,7 @@ public:
         }
         catch (const serial::IOException e)
         {
-            ROS_ERROR(e.what());
+            ROS_ERROR("串口错误，无法发送信息");
             return -1;
         }
     }
@@ -195,8 +228,8 @@ public:
         if (Recieve_Buffer[0] == HEADER && Recieve_Buffer[11] == TAIL) // 验证数据包的帧尾
         {
 
-            agv_encoder_vel = Motor_Control::Encoder_Trans();
-            ROS_INFO("agv速度为x=%.3f y=%.3f z=%.3f", agv_encoder_vel.X, agv_encoder_vel.Y, agv_encoder_vel.Z);
+            agv_encoder_vel = Encoder_Trans();
+            ROS_INFO("agv速度为x=%.3f y=%.3f z=%.3f", agv_encoder_vel.X, agv_encoder_vel.Y, agv_encoder_vel.Yaw);
             se.flush();
             return true;
         }
@@ -219,7 +252,7 @@ public:
         // 这里是AGV本身坐标系下的
         dx = agv_encoder_vel.X * dt;
         dy = agv_encoder_vel.Y * dt;
-        dz = agv_encoder_vel.Z * dt;
+        dz = agv_encoder_vel.Yaw * dt;
         // 转化到世界坐标系下
         agv_pos.Yaw += dz;
         // 根据角度简化防止超过2pai
@@ -249,10 +282,10 @@ public:
         odom.pose.pose.position.z = 0;
         odom.pose.pose.orientation = odom_quat; // 姿态，通过Z轴转角转换的四元数
 
-        odom.child_frame_id = "base_link";              // 里程计TF子坐标
-        odom.twist.twist.linear.x = agv_encoder_vel.X;  // X方向速度
-        odom.twist.twist.linear.y = agv_encoder_vel.Y;  // Y方向速度
-        odom.twist.twist.angular.z = agv_encoder_vel.Z; // 绕Z轴角速度
+        odom.child_frame_id = "base_link";                // 里程计TF子坐标
+        odom.twist.twist.linear.x = agv_encoder_vel.X;    // X方向速度
+        odom.twist.twist.linear.y = agv_encoder_vel.Y;    // Y方向速度
+        odom.twist.twist.angular.z = agv_encoder_vel.Yaw; // 绕Z轴角速度
 
         pub_odom.publish(odom); // Pub odometer topic //发布里程计话题
         ros::spinOnce();
@@ -260,38 +293,8 @@ public:
     // 接收导航传入的速度数据
 };
 
-class Motor_Control
-{
-private:
-public:
-    static void Speed_Trans(AGV_Vel agv_vel)
-    {
-        // 运动学解算出四个轮子的线速度
-        MOTOR_Parameters[0].target = agv_vel.X + agv_vel.Y - agv_vel.Yaw * (wheel_center_x + wheel_center_y);
-        MOTOR_Parameters[1].target = -agv_vel.X + agv_vel.Y - agv_vel.Yaw * (wheel_center_x + wheel_center_y);
-        MOTOR_Parameters[2].target = agv_vel.X + agv_vel.Y + agv_vel.Yaw * (wheel_center_x + wheel_center_y);
-        MOTOR_Parameters[3].target = -agv_vel.X + agv_vel.Y + agv_vel.Yaw * (wheel_center_x + wheel_center_y);
-        for (uint8_t i = 0; i < 4; i++)
-        {
-            // 要先变为角速度值，再转化为preloader数值
-            MOTOR_Parameters[i].preloader.i_data = abs(PI * wheel_r_mm * 1000 / MOTOR_Parameters[i].target - 1);
-            // 转向判断
-            MOTOR_Parameters[i].direction_Target = (MOTOR_Parameters[i].target > 0) ? 1 : -1;
-        }
-    };
-    // 正向运动学解算
-    static AGV_Vel Encoder_Trans()
-    {
-        AGV_Vel agv_vel;
-        agv_vel.X = (PI * wheel_r_mm / encoder_num *
-                     (MOTOR_Parameters[0].encoder.i_data + MOTOR_Parameters[1].encoder.i_data + MOTOR_Parameters[2].encoder.i_data + MOTOR_Parameters[3].encoder.i_data) / 4);
-        agv_vel.Y = (PI * wheel_r_mm / encoder_num *
-                     (MOTOR_Parameters[0].encoder.i_data - MOTOR_Parameters[1].encoder.i_data + MOTOR_Parameters[2].encoder.i_data - MOTOR_Parameters[3].encoder.i_data) / 4);
-        agv_vel.Yaw = (PI * wheel_r_mm / encoder_num *
-                     (-MOTOR_Parameters[0].encoder.i_data - MOTOR_Parameters[1].encoder.i_data + MOTOR_Parameters[2].encoder.i_data + MOTOR_Parameters[3].encoder.i_data) / 4 / (wheel_center_x + wheel_center_y));
-        return agv_vel;
-    }
-};
+
+
 void V_CallBack(const geometry_msgs::Twist &msg)
 {
     float X = msg.linear.x * 1000;

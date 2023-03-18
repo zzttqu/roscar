@@ -1,26 +1,8 @@
 typedef union _uart_Float_
 {
-    int i_data;
+    short i_data;
     uint8_t byte[2];
 } uart_INT;
-typedef struct _Data_Reciever_
-{
-    unsigned char buffer[32];
-    uart_INT X_speed;
-    uart_INT Y_speed;
-    uart_INT Z_speed;
-} Data_Reciever;
-
-typedef struct _Data_Sender_
-{
-    unsigned char buffer[32];
-    unsigned char Data_Header;
-    uart_INT X_speed;
-    uart_INT Y_speed;
-    uart_INT Z_speed;
-    unsigned char Data_Tail;
-} Data_Sender;
-
 typedef struct _AGV_Vel_
 {
     float X;
