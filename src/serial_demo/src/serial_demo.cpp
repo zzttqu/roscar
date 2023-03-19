@@ -7,6 +7,7 @@
 #include <tf/transform_broadcaster.h>
 #include <nav_msgs/Odometry.h>
 #include <cmath>
+#include <signal.h>
 using namespace std;
 
 #define HEADER 'S'
@@ -24,6 +25,7 @@ AGV_Vel agv_nav_vel;
 // 车辆参数
 int wheel_center_x = 250;
 int wheel_center_y = 250;
+char port[] = "/dev/ttyUSB0";
 // uint8_t=unsigned char等价关系
 // # TODO 完成设置代码
 
@@ -37,15 +39,16 @@ static void Speed_Trans(AGV_Vel agv_vel)
     for (uint8_t i = 0; i < 4; i++)
     {
         // 要先变为角速度值，再转化为preloader数值,-1要在abs外边
-        MOTOR_Parameters[i].preloader.i_data = abs(PI * wheel_r_mm * 1000 / MOTOR_Parameters[i].target)-1;
+        MOTOR_Parameters[i].preloader.i_data = abs(PI * wheel_r_mm * 1000 / MOTOR_Parameters[i].target) - 1;
         // 转向判断
         MOTOR_Parameters[i].direction_Target = (MOTOR_Parameters[i].target > 0) ? 1 : -1;
     }
     std::ostringstream ss;
     for (int i = 0; i < 4; i++)
     {
-        ss <<"\n"<< static_cast<char>('A' + i) << "电机preloader:" << MOTOR_Parameters[i].preloader.i_data 
-        << "方向为:" << MOTOR_Parameters[i].direction_Target ;
+        ss << "\n"
+           << static_cast<char>('A' + i) << "电机preloader:" << MOTOR_Parameters[i].preloader.i_data
+           << "方向为:" << MOTOR_Parameters[i].direction_Target;
     }
     ROS_INFO_STREAM(ss.str());
 };
@@ -105,7 +108,7 @@ private:
                         }
                         else
                         {
-                            ROS_WARN_STREAM("接受数据校验未通过" << CRC);
+                            ROS_WARN_STREAM("接受数据校验未通过" << static_cast<char>(CRC));
                             memset(resBuff, 0x00, buff_size);
                         }
                     }
@@ -343,11 +346,17 @@ void STM32_Serial::V_CallBack(const geometry_msgs::Twist::ConstPtr &msg)
     ROS_INFO_STREAM("X速度为" << agv_nav_vel.X << "Y速度为" << agv_nav_vel.Y << "Z转动速度为" << agv_nav_vel.Yaw);
     Send_Speed_Trans();
     Send_Speed_Msg();
-    
 }
 STM32_Serial::STM32_Serial(ros::NodeHandle &node)
 {
     n = node;
+}
+void MySigintHandler(int sig)
+{
+    // 这里主要进行退出前的数据保存、内存清理、告知其他节点等工作
+
+    ROS_INFO("shutting down!");
+    ros::shutdown();
 }
 int main(int argc, char *argv[])
 {
@@ -359,14 +368,14 @@ int main(int argc, char *argv[])
     ros::Rate rate(200);
     STM32_Serial stm32_Serial(n);
     stm32_Serial.Subsribe_cmd_vel();
-    char port[] = "/dev/ttyUSB0";
+
     ROS_INFO("serial node is running");
     // ros::Subscriber velocityCMD = n.subscribe<geometry_msgs::Twist>("/cmd_vel", 1000, boost::bind(&STM32_Serial::V_CallBack, &stm32_Serial, _1));
     if (stm32_Serial.Serial_Init(port) == -1)
     {
         return -1;
     }
-    while (ros::ok() && count < 5000)
+    while (ros::ok())
     {
         if (stm32_Serial.Get_Data())
         {
