@@ -26,9 +26,6 @@ int wheel_center_y = 250;
 // uint8_t=unsigned char等价关系
 // # TODO 完成设置代码
 
-
-
-
 static void Speed_Trans(AGV_Vel agv_vel)
 {
     // 运动学解算出四个轮子的线速度
@@ -43,6 +40,7 @@ static void Speed_Trans(AGV_Vel agv_vel)
         // 转向判断
         MOTOR_Parameters[i].direction_Target = (MOTOR_Parameters[i].target > 0) ? 1 : -1;
     }
+    ROS_INFO_STREAM("A电机preloader" << MOTOR_Parameters[0].preloader.i_data << "B电机preloader" << MOTOR_Parameters[1].preloader.i_data << "C电机preloader" << MOTOR_Parameters[2].preloader.i_data << "D电机preloader" << MOTOR_Parameters[3].preloader.i_data);
 };
 // 正向运动学解算
 static AGV_Vel Encoder_Trans()
@@ -63,7 +61,10 @@ private:
     // 发送实际上是12个字节
     unsigned char Send_Buffer[16];
     serial::Serial se;
+    ros::NodeHandle n;
     serial::Timeout to = serial::Timeout::simpleTimeout(100);
+    ros::Publisher pub_odom;
+    ros::Subscriber velocityCMD;
     AGV_Vel agv_encoder_vel;
     AGV_Pos agv_pos;
     float posx = 0, posy = 0, dx = 0, dy = 0, dz = 0;
@@ -76,6 +77,7 @@ private:
             try
             {
                 se.read(ccbuff, se.available());
+
                 for (size_t i = 0; i < 64; i++)
                 {
                     if (ccbuff[i] == HEADER)
@@ -85,12 +87,13 @@ private:
                         {
                             resBuff[j] = ccbuff[i + j];
                         }
-                        for (size_t i = 0; i < 14; i++)
+                        for (size_t i = 0; i < 10; i++)
                         {
                             CRC = resBuff[i] ^ CRC;
                         }
-                        if (CRC == resBuff[14])
+                        if (CRC == resBuff[10])
                         {
+
                             return;
                         }
                         else
@@ -135,8 +138,21 @@ private:
     // STM32设置
     void STM32_Set()
     {
+        // 开启速度回传
         STM32_Settings[1] = 'I';
+        // 电机启动
+        STM32_Settings[2] = 'I';
         se.write(STM32_Settings, sizeof(STM32_Settings));
+        ROS_INFO_STREAM("设置成功" << STM32_Settings);
+    }
+    void STM32_Stop()
+    {
+        // 关闭速度回传
+        STM32_Settings[1] = 'S';
+        // 电机停止
+        STM32_Settings[2] = 'S';
+        se.write(STM32_Settings, sizeof(STM32_Settings));
+        ROS_INFO_STREAM("设置成功" << STM32_Settings);
     }
 
     void Send_Speed_Trans()
@@ -177,13 +193,14 @@ private:
     }
 
 public:
+    STM32_Serial(ros::NodeHandle& node);
     // 串口初始化
     int Serial_Init(char port[])
     {
         try
         {
             se.setPort(port);
-            se.setBaudrate(9600);
+            se.setBaudrate(38400);
             se.setTimeout(to);
             se.open();
             STM32_Set();
@@ -192,7 +209,22 @@ public:
         }
         catch (serial::IOException &e)
         {
-            ROS_ERROR("打开串口失败");
+            ROS_ERROR_STREAM("打开串口失败" << e.what());
+            return -1;
+        }
+    }
+    int Serial_Close(char port[])
+    {
+        try
+        {
+            STM32_Stop();
+            se.close();
+            ROS_INFO("关闭串口成功");
+            return 1;
+        }
+        catch (serial::IOException &e)
+        {
+            ROS_ERROR("关闭串口失败");
             return -1;
         }
     }
@@ -222,14 +254,13 @@ public:
     // 获取串口数据并转化
     bool Get_Data()
     {
-        static int count = 0;                              // 静态变量，用于计数
         Read_Data(Recieve_Buffer, sizeof(Recieve_Buffer)); // 通过串口读取下位机发送过来的数据
         Recieve_Speed_Trans();
         if (Recieve_Buffer[0] == HEADER && Recieve_Buffer[11] == TAIL) // 验证数据包的帧尾
         {
 
             agv_encoder_vel = Encoder_Trans();
-            ROS_INFO("agv速度为x=%.3f y=%.3f z=%.3f", agv_encoder_vel.X, agv_encoder_vel.Y, agv_encoder_vel.Yaw);
+            // ROS_INFO("agv速度为x=%.3f y=%.3f z=%.3f", agv_encoder_vel.X, agv_encoder_vel.Y, agv_encoder_vel.Yaw);
             se.flush();
             return true;
         }
@@ -242,8 +273,7 @@ public:
         static tf::TransformBroadcaster odom_broadcaster;
         // 定义tf发布时需要的类型消息
         geometry_msgs::TransformStamped odom_trans;
-        ros::NodeHandle n;
-        static ros::Publisher pub_odom = n.advertise<nav_msgs::Odometry>("/odom", 1000);
+        pub_odom = n.advertise<nav_msgs::Odometry>("/odom", 1000);
         nav_msgs::Odometry odom; // 实例化里程计话题数据
 
         ros::Time current_time = ros::Time::now();
@@ -286,42 +316,49 @@ public:
         odom.twist.twist.linear.x = agv_encoder_vel.X;    // X方向速度
         odom.twist.twist.linear.y = agv_encoder_vel.Y;    // Y方向速度
         odom.twist.twist.angular.z = agv_encoder_vel.Yaw; // 绕Z轴角速度
-
-        pub_odom.publish(odom); // Pub odometer topic //发布里程计话题
+        pub_odom.publish(odom);                           // Pub odometer topic //发布里程计话题
         ros::spinOnce();
     }
     // 接收导航传入的速度数据
+    void Subsribe_cmd_vel()
+    {
+        velocityCMD = n.subscribe<geometry_msgs::Twist>("/cmd_vel", 1000, boost::bind(&STM32_Serial::V_CallBack, this, _1));
+    }
+    void V_CallBack(const geometry_msgs::Twist::ConstPtr &msg);
 };
-
-
-
-void V_CallBack(const geometry_msgs::Twist &msg)
+void STM32_Serial::V_CallBack(const geometry_msgs::Twist::ConstPtr &msg)
 {
-    float X = msg.linear.x * 1000;
-    float Y = msg.linear.y * 1000;
-    double Yaw = msg.angular.z; // 这个是rad/s
+    // 换算为mm/s
+    float X = msg.get()->linear.x * 1000;
+    float Y = msg.get()->linear.y * 1000;
+    double Yaw = msg.get()->angular.z; // 这个是rad/s
     agv_nav_vel = {X, Y, Yaw};
+    Send_Speed_Trans();
+    Send_Speed_Msg();
     ROS_INFO_STREAM("X速度为" << agv_nav_vel.X << "Y速度为" << agv_nav_vel.Y << "Z转动速度为" << agv_nav_vel.Yaw);
 }
-
+STM32_Serial::STM32_Serial(ros::NodeHandle& node)
+{
+    n = node;
+}
 int main(int argc, char *argv[])
 {
-
+    int count = 0;
     setlocale(LC_ALL, "");
     setlocale(LC_CTYPE, "zh_CN.utf8");
-    STM32_Serial stm32_Serial;
     ros::init(argc, argv, "serial_port");
     ros::NodeHandle n;
-    ros::Rate rate(10);
+    ros::Rate rate(200);
+    STM32_Serial stm32_Serial(n);
+    stm32_Serial.Subsribe_cmd_vel();
     char port[] = "/dev/ttyUSB0";
     ROS_INFO("serial node is running");
-    ros::Subscriber velocityCMD = n.subscribe("/cmd_vel", 1000, V_CallBack);
-    // if (stm32_Serial.Serial_Init(port) == -1)
-    // {
-    //     return -1;
-    // }
-
-    while (ros::ok())
+    //ros::Subscriber velocityCMD = n.subscribe<geometry_msgs::Twist>("/cmd_vel", 1000, boost::bind(&STM32_Serial::V_CallBack, &stm32_Serial, _1));
+    if (stm32_Serial.Serial_Init(port) == -1)
+    {
+        return -1;
+    }
+    while (ros::ok() && count < 5000)
     {
         if (stm32_Serial.Get_Data())
         {
@@ -329,6 +366,8 @@ int main(int argc, char *argv[])
         }
         ros::spinOnce();
         rate.sleep();
+        count++;
     }
+    stm32_Serial.Serial_Close(port);
     return 0;
 }
