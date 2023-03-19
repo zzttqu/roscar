@@ -13,9 +13,9 @@ typedef struct _AGV_Vel_
 // 这个是在世界坐标系下的坐标，不是车自身坐标系下的
 typedef struct _AGV_Pos_
 {
-    float X;
-    float Y;
-    float Yaw;
+    double X;
+    double Y;
+    double Yaw;
 } AGV_Pos;
 
 typedef struct _Motor_Parameter_

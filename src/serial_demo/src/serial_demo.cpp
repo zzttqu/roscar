@@ -15,8 +15,9 @@ using namespace std;
 #define PI 3.14159
 #define active_code 'I'
 #define deactive_code 'S'
-#define wheel_r_mm 150
-#define encoder_num 1000
+#define wheel_r_mm 150.0
+#define encoder_num 1000.0
+#define dt 0.1
 // sudo chmod 666 /dev/ttyUSB0
 //  发送和接受串口消息
 Motor_Parameter MOTOR_Parameters[4];
@@ -25,6 +26,7 @@ AGV_Vel agv_nav_vel;
 // 车辆参数
 int wheel_center_x = 250;
 int wheel_center_y = 250;
+serial::Serial se;
 char port[] = "/dev/ttyUSB0";
 // uint8_t=unsigned char等价关系
 // # TODO 完成设置代码
@@ -40,6 +42,10 @@ static void Speed_Trans(AGV_Vel agv_vel)
     {
         // 要先变为角速度值，再转化为preloader数值,-1要在abs外边
         MOTOR_Parameters[i].preloader.i_data = abs(PI * wheel_r_mm * 1000 / MOTOR_Parameters[i].target) - 1;
+        if (MOTOR_Parameters[i].preloader.i_data == 0)
+        {
+            MOTOR_Parameters[i].preloader.i_data = 15000;
+        }
         // 转向判断
         MOTOR_Parameters[i].direction_Target = (MOTOR_Parameters[i].target > 0) ? 1 : -1;
     }
@@ -56,12 +62,21 @@ static void Speed_Trans(AGV_Vel agv_vel)
 static AGV_Vel Encoder_Trans()
 {
     AGV_Vel agv_vel;
-    agv_vel.X = (PI * wheel_r_mm / encoder_num *
-                 (MOTOR_Parameters[0].encoder.i_data + MOTOR_Parameters[1].encoder.i_data + MOTOR_Parameters[2].encoder.i_data + MOTOR_Parameters[3].encoder.i_data) / 4);
-    agv_vel.Y = (PI * wheel_r_mm / encoder_num *
-                 (MOTOR_Parameters[0].encoder.i_data - MOTOR_Parameters[1].encoder.i_data + MOTOR_Parameters[2].encoder.i_data - MOTOR_Parameters[3].encoder.i_data) / 4);
-    agv_vel.Yaw = (PI * wheel_r_mm / encoder_num *
-                   (-MOTOR_Parameters[0].encoder.i_data - MOTOR_Parameters[1].encoder.i_data + MOTOR_Parameters[2].encoder.i_data + MOTOR_Parameters[3].encoder.i_data) / 4 / (wheel_center_x + wheel_center_y));
+    agv_vel.X = 2 * PI * wheel_r_mm * (MOTOR_Parameters[0].encoder.i_data + MOTOR_Parameters[1].encoder.i_data + MOTOR_Parameters[2].encoder.i_data + MOTOR_Parameters[3].encoder.i_data) / 4.0 / dt / encoder_num;
+    agv_vel.Y = 2 * PI * wheel_r_mm * (MOTOR_Parameters[0].encoder.i_data - MOTOR_Parameters[1].encoder.i_data + MOTOR_Parameters[2].encoder.i_data - MOTOR_Parameters[3].encoder.i_data) / 4.0 / dt / encoder_num;
+    agv_vel.Yaw = 2 * PI * wheel_r_mm * ((-MOTOR_Parameters[0].encoder.i_data - MOTOR_Parameters[1].encoder.i_data + MOTOR_Parameters[2].encoder.i_data + MOTOR_Parameters[3].encoder.i_data) / 4.0 / dt / (wheel_center_x + wheel_center_y) / encoder_num);
+    // 转换为m
+    agv_vel.X = int(agv_vel.X / 1000.0 * 100) / 100.0;
+    agv_vel.Y = int(agv_vel.Y / 1000.0 * 100) / 100.0;
+    agv_vel.Yaw = int(agv_vel.Yaw * 100) / 100.0;
+    // std::ostringstream ss;
+    // for (int i = 0; i < 4; i++)
+    // {
+    //     ss << " "
+    //        << MOTOR_Parameters[i].encoder.i_data;
+    // }
+    // ROS_INFO_STREAM(ss.str());
+    // ROS_INFO_STREAM("X速度为" << agv_vel.X << " Y速度为" << agv_vel.Y << " Z转角为" << agv_vel.Yaw);
     return agv_vel;
 }
 class STM32_Serial
@@ -70,7 +85,6 @@ private:
     unsigned char Recieve_Buffer[32];
     // 发送实际上是12个字节
     unsigned char Send_Buffer[16];
-    serial::Serial se;
     ros::NodeHandle n;
     serial::Timeout to = serial::Timeout::simpleTimeout(100);
     ros::Publisher pub_odom;
@@ -108,9 +122,19 @@ private:
                         }
                         else
                         {
-                            ROS_WARN_STREAM("接受数据校验未通过" << static_cast<char>(CRC));
+                            std::ostringstream ss;
+                            for (int i = 0; i < 16; i++)
+                            {
+                                ss << " " << hex
+                                   << (short)resBuff[i];
+                            }
+                            ROS_WARN_STREAM("接受数据校验未通过" << ss.str());
                             memset(resBuff, 0x00, buff_size);
                         }
+                    }
+                    else
+                    {
+                        memset(resBuff, 0x00, buff_size);
                     }
                 }
                 // ROS_INFO_STREAM(ccbuff);
@@ -172,34 +196,44 @@ private:
         // 赋值到buffer中进行传输，四bit为一个float
         Speed_Trans(agv_nav_vel);
         Send_Buffer[0] = HEADER;
-        for (size_t i = 2; i < 10; i++)
+        for (size_t i = 2; i < 14; i++)
         {
             if (i < 4)
             {
-                Send_Buffer[i] = MOTOR_Parameters[0].preloader.byte[(i - 2) % 2];
+                Send_Buffer[i] = MOTOR_Parameters[0].preloader.byte[(i % 2) ? 0 : 1];
             }
             else if (3 < i && i < 6)
             {
-                Send_Buffer[i] = MOTOR_Parameters[1].preloader.byte[(i - 2) % 2];
+                Send_Buffer[i] = MOTOR_Parameters[1].preloader.byte[(i % 2) ? 0 : 1];
             }
             else if (5 < i && i < 8)
             {
-                Send_Buffer[i] = MOTOR_Parameters[2].preloader.byte[(i - 2) % 2];
+                Send_Buffer[i] = MOTOR_Parameters[2].preloader.byte[(i % 2) ? 0 : 1];
             }
             else if (7 < i && i < 10)
             {
-                Send_Buffer[i] = MOTOR_Parameters[3].preloader.byte[(i - 2) % 2];
+                Send_Buffer[i] = MOTOR_Parameters[3].preloader.byte[(i % 2) ? 0 : 1];
             }
             else if (9 < i && i < 14)
             {
                 Send_Buffer[i] = MOTOR_Parameters[(i - 2) % 4].direction_Target;
             }
         }
+        uint8_t CRC = 0x00;
         for (size_t i = 0; i < 14; i++)
         {
-            Send_Buffer[14] = Send_Buffer[i] ^ Send_Buffer[14];
+            CRC = Send_Buffer[i] ^ CRC;
         }
-        Send_Buffer[11] = TAIL;
+        Send_Buffer[14] = CRC;
+        Send_Buffer[15] = TAIL;
+
+        // std::ostringstream ss;
+        // for (int i = 0; i < 16; i++)
+        // {
+        //     ss << " " << hex
+        //        << (short)Send_Buffer[i];
+        // }
+        // ROS_INFO_STREAM(ss.str());
     }
 
 public:
@@ -270,7 +304,7 @@ public:
         {
 
             agv_encoder_vel = Encoder_Trans();
-            // ROS_INFO("agv速度为x=%.3f y=%.3f z=%.3f", agv_encoder_vel.X, agv_encoder_vel.Y, agv_encoder_vel.Yaw);
+            //ROS_INFO("agv速度为x=%.3f y=%.3f z=%.3f", agv_encoder_vel.X, agv_encoder_vel.Y, agv_encoder_vel.Yaw);
             se.flush();
             return true;
         }
@@ -288,9 +322,10 @@ public:
 
         ros::Time current_time = ros::Time::now();
 
-        double dt = 0.05; // 循环获取STM32速度
+        // 循环获取STM32速度,间隔是0.1s
+
         // 这里是AGV本身坐标系下的
-        dx = agv_encoder_vel.X * dt;
+        dx = agv_encoder_vel.X * dt; // dt是宏定义的，是32读取编码器的时间
         dy = agv_encoder_vel.Y * dt;
         dz = agv_encoder_vel.Yaw * dt;
         // 转化到世界坐标系下
@@ -354,9 +389,11 @@ STM32_Serial::STM32_Serial(ros::NodeHandle &node)
 void MySigintHandler(int sig)
 {
     // 这里主要进行退出前的数据保存、内存清理、告知其他节点等工作
-
+    se.write("ASS");
+    se.close();
     ROS_INFO("shutting down!");
     ros::shutdown();
+    exit(0);
 }
 int main(int argc, char *argv[])
 {
@@ -365,10 +402,10 @@ int main(int argc, char *argv[])
     setlocale(LC_CTYPE, "zh_CN.utf8");
     ros::init(argc, argv, "serial_port");
     ros::NodeHandle n;
-    ros::Rate rate(200);
+    ros::Rate rate(10);
     STM32_Serial stm32_Serial(n);
     stm32_Serial.Subsribe_cmd_vel();
-
+    signal(SIGINT, MySigintHandler);
     ROS_INFO("serial node is running");
     // ros::Subscriber velocityCMD = n.subscribe<geometry_msgs::Twist>("/cmd_vel", 1000, boost::bind(&STM32_Serial::V_CallBack, &stm32_Serial, _1));
     if (stm32_Serial.Serial_Init(port) == -1)

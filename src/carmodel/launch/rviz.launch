@@ -1,6 +1,7 @@
 <launch>
     <arg
       name="model" />
+      <param name="robot_description"  command="$(find xacro)/xacro $(find carmodel)/xacro/carassmble.xacro" />
     <node
       name="joint_state_publisher"
       pkg="joint_state_publisher"
@@ -13,5 +14,5 @@
       name="rviz"
       pkg="rviz"
       type="rviz"
-      args="-d $(find carmodel)/config/amcl.rviz" />
+      args="-d $(find carmodel)/config/modeldisplay.rviz" />
   </launch>
