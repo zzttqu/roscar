@@ -22,7 +22,7 @@ typedef struct _Motor_Parameter_
 {
   float target;
   uart_INT preloader;
-  uint8_t direction_Target;
+  int direction_Target;
   uart_INT encoder;
-  uint8_t direction_Now;
+  int direction_Now;
 } Motor_Parameter;

@@ -1,4 +1,5 @@
 #include <ros/ros.h>
+#include <sstream>
 #include "serial/serial.h"
 #include <string>
 #include <iostream>
@@ -29,18 +30,24 @@ int wheel_center_y = 250;
 static void Speed_Trans(AGV_Vel agv_vel)
 {
     // 运动学解算出四个轮子的线速度
-    MOTOR_Parameters[0].target = agv_vel.X + agv_vel.Y - agv_vel.Yaw * (wheel_center_x + wheel_center_y);
-    MOTOR_Parameters[1].target = -agv_vel.X + agv_vel.Y - agv_vel.Yaw * (wheel_center_x + wheel_center_y);
-    MOTOR_Parameters[2].target = agv_vel.X + agv_vel.Y + agv_vel.Yaw * (wheel_center_x + wheel_center_y);
-    MOTOR_Parameters[3].target = -agv_vel.X + agv_vel.Y + agv_vel.Yaw * (wheel_center_x + wheel_center_y);
+    MOTOR_Parameters[0].target = agv_vel.Y + agv_vel.X - agv_vel.Yaw * (wheel_center_x + wheel_center_y);
+    MOTOR_Parameters[1].target = -agv_vel.Y + agv_vel.X - agv_vel.Yaw * (wheel_center_x + wheel_center_y);
+    MOTOR_Parameters[2].target = agv_vel.Y + agv_vel.X + agv_vel.Yaw * (wheel_center_x + wheel_center_y);
+    MOTOR_Parameters[3].target = -agv_vel.Y + agv_vel.X + agv_vel.Yaw * (wheel_center_x + wheel_center_y);
     for (uint8_t i = 0; i < 4; i++)
     {
-        // 要先变为角速度值，再转化为preloader数值
-        MOTOR_Parameters[i].preloader.i_data = (uint8_t)abs(PI * wheel_r_mm * 1000 / MOTOR_Parameters[i].target - 1);
+        // 要先变为角速度值，再转化为preloader数值,-1要在abs外边
+        MOTOR_Parameters[i].preloader.i_data = abs(PI * wheel_r_mm * 1000 / MOTOR_Parameters[i].target)-1;
         // 转向判断
         MOTOR_Parameters[i].direction_Target = (MOTOR_Parameters[i].target > 0) ? 1 : -1;
     }
-    ROS_INFO_STREAM("A电机preloader" << MOTOR_Parameters[0].preloader.i_data << "B电机preloader" << MOTOR_Parameters[1].preloader.i_data << "C电机preloader" << MOTOR_Parameters[2].preloader.i_data << "D电机preloader" << MOTOR_Parameters[3].preloader.i_data);
+    std::ostringstream ss;
+    for (int i = 0; i < 4; i++)
+    {
+        ss <<"\n"<< static_cast<char>('A' + i) << "电机preloader:" << MOTOR_Parameters[i].preloader.i_data 
+        << "方向为:" << MOTOR_Parameters[i].direction_Target ;
+    }
+    ROS_INFO_STREAM(ss.str());
 };
 // 正向运动学解算
 static AGV_Vel Encoder_Trans()
@@ -193,7 +200,7 @@ private:
     }
 
 public:
-    STM32_Serial(ros::NodeHandle& node);
+    STM32_Serial(ros::NodeHandle &node);
     // 串口初始化
     int Serial_Init(char port[])
     {
@@ -333,11 +340,12 @@ void STM32_Serial::V_CallBack(const geometry_msgs::Twist::ConstPtr &msg)
     float Y = msg.get()->linear.y * 1000;
     double Yaw = msg.get()->angular.z; // 这个是rad/s
     agv_nav_vel = {X, Y, Yaw};
+    ROS_INFO_STREAM("X速度为" << agv_nav_vel.X << "Y速度为" << agv_nav_vel.Y << "Z转动速度为" << agv_nav_vel.Yaw);
     Send_Speed_Trans();
     Send_Speed_Msg();
-    ROS_INFO_STREAM("X速度为" << agv_nav_vel.X << "Y速度为" << agv_nav_vel.Y << "Z转动速度为" << agv_nav_vel.Yaw);
+    
 }
-STM32_Serial::STM32_Serial(ros::NodeHandle& node)
+STM32_Serial::STM32_Serial(ros::NodeHandle &node)
 {
     n = node;
 }
@@ -353,7 +361,7 @@ int main(int argc, char *argv[])
     stm32_Serial.Subsribe_cmd_vel();
     char port[] = "/dev/ttyUSB0";
     ROS_INFO("serial node is running");
-    //ros::Subscriber velocityCMD = n.subscribe<geometry_msgs::Twist>("/cmd_vel", 1000, boost::bind(&STM32_Serial::V_CallBack, &stm32_Serial, _1));
+    // ros::Subscriber velocityCMD = n.subscribe<geometry_msgs::Twist>("/cmd_vel", 1000, boost::bind(&STM32_Serial::V_CallBack, &stm32_Serial, _1));
     if (stm32_Serial.Serial_Init(port) == -1)
     {
         return -1;
