@@ -326,7 +326,7 @@ public:
 
         // 这里是AGV本身坐标系下的
         dx = (agv_encoder_vel.X * cos(agv_pos.Yaw) - agv_encoder_vel.Y * sin(agv_pos.Yaw)) * dt; // dt是宏定义的，是32读取编码器的时间
-        dy = (agv_encoder_vel.X * sin(agv_pos.Yaw) - agv_encoder_vel.Y * cos(agv_pos.Yaw)) * dt;
+        dy = (agv_encoder_vel.X * sin(agv_pos.Yaw) + agv_encoder_vel.Y * cos(agv_pos.Yaw)) * dt;
         dz = agv_encoder_vel.Yaw * dt;
         // 转化到世界坐标系下
         agv_pos.Yaw += dz;
