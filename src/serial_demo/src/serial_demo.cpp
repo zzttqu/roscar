@@ -91,7 +91,7 @@ private:
     ros::Subscriber velocityCMD;
     AGV_Vel agv_encoder_vel;
     AGV_Pos agv_pos;
-    float posx = 0, posy = 0, dx = 0, dy = 0, dz = 0;
+    double posx = 0, posy = 0, dx = 0, dy = 0, dz = 0;
 
     void Read_Data(uint8_t resBuff[], int buff_size)
     {
@@ -304,7 +304,7 @@ public:
         {
 
             agv_encoder_vel = Encoder_Trans();
-            //ROS_INFO("agv速度为x=%.3f y=%.3f z=%.3f", agv_encoder_vel.X, agv_encoder_vel.Y, agv_encoder_vel.Yaw);
+            // ROS_INFO("agv速度为x=%.3f y=%.3f z=%.3f", agv_encoder_vel.X, agv_encoder_vel.Y, agv_encoder_vel.Yaw);
             se.flush();
             return true;
         }
@@ -325,16 +325,18 @@ public:
         // 循环获取STM32速度,间隔是0.1s
 
         // 这里是AGV本身坐标系下的
-        dx = agv_encoder_vel.X * dt; // dt是宏定义的，是32读取编码器的时间
-        dy = agv_encoder_vel.Y * dt;
+        dx = (agv_encoder_vel.X * cos(agv_pos.Yaw) - agv_encoder_vel.Y * sin(agv_pos.Yaw)) * dt; // dt是宏定义的，是32读取编码器的时间
+        dy = (agv_encoder_vel.X * sin(agv_pos.Yaw) - agv_encoder_vel.Y * cos(agv_pos.Yaw)) * dt;
         dz = agv_encoder_vel.Yaw * dt;
         // 转化到世界坐标系下
         agv_pos.Yaw += dz;
         // 根据角度简化防止超过2pai
-        agv_pos.Yaw = (agv_pos.Yaw > PI) ? (agv_pos.Yaw - 2 * PI) : ((agv_pos.Yaw < -PI) ? (agv_pos.Yaw + 2 * PI) : agv_pos.Yaw);
+        // agv_pos.Yaw = (agv_pos.Yaw > PI) ? (agv_pos.Yaw - 2 * PI) : ((agv_pos.Yaw < -PI) ? (agv_pos.Yaw + 2 * PI) : agv_pos.Yaw);
         // 世界坐标系下
-        agv_pos.X -= dx * cos(agv_pos.Yaw) + dy * sin(agv_pos.Yaw);
-        agv_pos.Y += dx * sin(agv_pos.Yaw) - dy * cos(agv_pos.Yaw);
+        // agv_pos.X += dx * cos(agv_pos.Yaw) + dy * sin(agv_pos.Yaw);
+        // agv_pos.Y += dx * sin(agv_pos.Yaw) + dy * cos(agv_pos.Yaw);
+        agv_pos.X += dx;
+        agv_pos.Y += dy;
         // 把Z轴转角转换为四元数进行表达
         geometry_msgs::Quaternion odom_quat = tf::createQuaternionMsgFromYaw(agv_pos.Yaw);
 
