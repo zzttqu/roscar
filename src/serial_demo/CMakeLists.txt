@@ -121,14 +121,19 @@ catkin_package(
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations
 include_directories(
-# include
+  include
   ${catkin_INCLUDE_DIRS}
 )
 
 ## Declare a C++ library
-# add_library(${PROJECT_NAME}
-#   src/${PROJECT_NAME}/serial_demo.cpp
-# )
+add_library(
+   includeDir
+   src/KalmanFilter.cpp
+   src/serial_demo.cpp
+   include/myData.hpp
+   include/KalmanFilter.hpp
+   include/serial_demo.hpp
+)rosclean check
 
 ## Add cmake target dependencies of the library
 ## as an example, code may need to be generated before libraries
@@ -138,7 +143,7 @@ include_directories(
 ## Declare a C++ executable
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
-add_executable(serial_demo src/serial_demo.cpp)
+add_executable(serial_demo src/main.cpp)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
@@ -152,6 +157,7 @@ add_executable(serial_demo src/serial_demo.cpp)
 
 ## Specify libraries to link a library or executable target against
 target_link_libraries(serial_demo 
+  includeDir
   ${catkin_LIBRARIES}
 )
 

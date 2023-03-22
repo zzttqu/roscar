@@ -1,3 +1,6 @@
+#ifndef myData_H
+#define myData_H
+#include "KalmanFilter.hpp"
 typedef union _uart_Float_
 {
     short i_data;
@@ -25,4 +28,6 @@ typedef struct _Motor_Parameter_
   int direction_Target;
   uart_INT encoder;
   int direction_Now;
+  KalmanFilter kf;
 } Motor_Parameter;
+#endif
