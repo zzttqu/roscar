@@ -17,10 +17,10 @@ char port[] = "/dev/ttyUSB0";
 static void Speed_Trans(AGV_Vel agv_vel)
 {
     // 运动学解算出四个轮子的线速度
-    MOTOR_Parameters[0].target = agv_vel.Y + agv_vel.X - agv_vel.Yaw * (wheel_center_x + wheel_center_y);
-    MOTOR_Parameters[1].target = -agv_vel.Y + agv_vel.X - agv_vel.Yaw * (wheel_center_x + wheel_center_y);
-    MOTOR_Parameters[2].target = agv_vel.Y + agv_vel.X + agv_vel.Yaw * (wheel_center_x + wheel_center_y);
-    MOTOR_Parameters[3].target = -agv_vel.Y + agv_vel.X + agv_vel.Yaw * (wheel_center_x + wheel_center_y);
+    MOTOR_Parameters[0].target = agv_vel.X - agv_vel.Y - agv_vel.Yaw * (wheel_center_x + wheel_center_y);
+    MOTOR_Parameters[1].target = agv_vel.X + agv_vel.Y + agv_vel.Yaw * (wheel_center_x + wheel_center_y);
+    MOTOR_Parameters[2].target = agv_vel.X - agv_vel.Y + agv_vel.Yaw * (wheel_center_x + wheel_center_y);
+    MOTOR_Parameters[3].target = agv_vel.X + agv_vel.Y - agv_vel.Yaw * (wheel_center_x + wheel_center_y);
     for (uint8_t i = 0; i < 4; i++)
     {
         // 要先变为角速度值，再转化为preloader数值,-1要在abs外边
@@ -36,7 +36,7 @@ static void Speed_Trans(AGV_Vel agv_vel)
     for (int i = 0; i < 4; i++)
     {
         ss << "\n"
-           << static_cast<char>('A' + i) << "电机preloader:" << MOTOR_Parameters[i].preloader.i_data
+           << static_cast<char>('1' + i) << "电机preloader:" << MOTOR_Parameters[i].preloader.i_data
            << "方向为:" << MOTOR_Parameters[i].direction_Target;
     }
     ROS_INFO_STREAM(ss.str());
@@ -46,25 +46,25 @@ static AGV_Vel Encoder_Trans()
 {
     AGV_Vel agv_vel;
     // 对编码器数据进行卡尔曼滤波
-    for (size_t i = 0; i < 4; i++)
-    {
-        MOTOR_Parameters[i].encoder.i_data = static_cast<short>(MOTOR_Parameters->kf.filter(MOTOR_Parameters[i].encoder.i_data));
-    }
+    // for (size_t i = 0; i < 4; i++)
+    // {
+    //     MOTOR_Parameters[i].encoder.i_data = static_cast<short>(MOTOR_Parameters->kf.filter(MOTOR_Parameters[i].encoder.i_data));
+    // }
     agv_vel.X = 2 * PI * wheel_r_mm * (MOTOR_Parameters[0].encoder.i_data + MOTOR_Parameters[1].encoder.i_data + MOTOR_Parameters[2].encoder.i_data + MOTOR_Parameters[3].encoder.i_data) / 4.0 / dt / encoder_num;
-    agv_vel.Y = 2 * PI * wheel_r_mm * (MOTOR_Parameters[0].encoder.i_data - MOTOR_Parameters[1].encoder.i_data + MOTOR_Parameters[2].encoder.i_data - MOTOR_Parameters[3].encoder.i_data) / 4.0 / dt / encoder_num;
-    agv_vel.Yaw = 2 * PI * wheel_r_mm * ((-MOTOR_Parameters[0].encoder.i_data - MOTOR_Parameters[1].encoder.i_data + MOTOR_Parameters[2].encoder.i_data + MOTOR_Parameters[3].encoder.i_data) / 4.0 / dt / (wheel_center_x + wheel_center_y) / encoder_num);
+    agv_vel.Y = 2 * PI * wheel_r_mm * (-MOTOR_Parameters[0].encoder.i_data - MOTOR_Parameters[1].encoder.i_data + MOTOR_Parameters[2].encoder.i_data + MOTOR_Parameters[3].encoder.i_data) / 4.0 / dt / encoder_num;
+    agv_vel.Yaw = 2 * PI * wheel_r_mm * ((-MOTOR_Parameters[0].encoder.i_data + MOTOR_Parameters[1].encoder.i_data + MOTOR_Parameters[2].encoder.i_data - MOTOR_Parameters[3].encoder.i_data) / 4.0 / dt / (wheel_center_x + wheel_center_y) / encoder_num);
     // 转换为m
     agv_vel.X = int(agv_vel.X / 1000.0 * 100) / 100.0;
     agv_vel.Y = int(agv_vel.Y / 1000.0 * 100) / 100.0;
     agv_vel.Yaw = int(agv_vel.Yaw * 100) / 100.0;
-    // std::ostringstream ss;
-    // for (int i = 0; i < 4; i++)
-    // {
-    //     ss << " "
-    //        << MOTOR_Parameters[i].encoder.i_data;
-    // }
-    // ROS_INFO_STREAM(ss.str());
-    // ROS_INFO_STREAM("X速度为" << agv_vel.X << " Y速度为" << agv_vel.Y << " Z转角为" << agv_vel.Yaw);
+    std::ostringstream ss;
+    for (int i = 0; i < 4; i++)
+    {
+        ss << " "
+           << MOTOR_Parameters[i].encoder.i_data;
+    }
+    ROS_INFO_STREAM(ss.str());
+    ROS_INFO_STREAM("X速度为" << agv_vel.X << " Y速度为" << agv_vel.Y << " Z转角为" << agv_vel.Yaw);
     return agv_vel;
 }
 
