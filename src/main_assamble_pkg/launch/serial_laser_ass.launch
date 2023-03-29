@@ -1,0 +1,4 @@
+<launch>
+  <include file="$(find rplidar_ros)/launch/rplidar.launch" />
+    <node pkg="serial_demo" />
+</launch>
