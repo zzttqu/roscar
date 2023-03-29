@@ -1,3 +1,11 @@
+/*
+ * @Author: zzttqu zzttqu@gmail.com
+ * @Date: 2023-03-28 11:55:46
+ * @LastEditors: zzttqu zzttqu@gmail.com
+ * @LastEditTime: 2023-03-29 15:58:22
+ * @FilePath: /roscar/src/serial_demo/include/serial_demo.hpp
+ * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
+ */
 #ifndef Serial_My_H
 #define Serial_My_H
 
@@ -57,7 +65,7 @@ private:
 
 public:
     STM32_Serial(ros::NodeHandle &node);
-    int Serial_Init(char port[]);
+    int Serial_Init(string port,int baudrate);
     int Serial_Close(char port[]);
     int Send_Speed_Msg();
     bool Get_Data();

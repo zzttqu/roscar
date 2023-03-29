@@ -1,4 +1,7 @@
 <launch>
+  <!-- 雷达发布节点-->
   <include file="$(find rplidar_ros)/launch/rplidar.launch" />
-    <node pkg="serial_demo" />
+  <node pkg="serial_demo" type="serial_demo" output="screen" name="STM32serialNode">
+    <param></param>
+  </node>
 </launch>

@@ -7,13 +7,16 @@ int main(int argc, char *argv[])
     setlocale(LC_CTYPE, "zh_CN.utf8");
     ros::init(argc, argv, "serial_port");
     ros::NodeHandle n;
+    ros::NodeHandle n_private("~");
     ros::Rate rate(10);
     STM32_Serial stm32_Serial(n);
     stm32_Serial.Subsribe_cmd_vel();
     signal(SIGINT, MySigintHandler);
     ROS_INFO("serial node is running");
-    // ros::Subscriber velocityCMD = n.subscribe<geometry_msgs::Twist>("/cmd_vel", 1000, boost::bind(&STM32_Serial::V_CallBack, &stm32_Serial, _1));
-    if (stm32_Serial.Serial_Init(port) == -1)
+    //获取stm32串口参数
+    string port = n_private.param<std::string>("serial_port", "ttyUSB0");
+    int baudrate = n_private.param<int>("serial_bau", 38400);
+    if (stm32_Serial.Serial_Init(port, baudrate) == -1)
     {
         return -1;
     }
