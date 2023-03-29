@@ -7,6 +7,8 @@
   <include file="$(find wit_ros_imu)/launch/my_imu.launch">
     <arg name="port" value="ttyUSB2"/>
   </include>
+  <include file="$(find robot_pose_ekf)/launch/my_pose_ekf.launch">
+  </include>
   <node pkg="serial_demo" type="serial_demo" output="screen" name="STM32serialNode">
     <param name="serial_port" type="string" value="/dev/ttyUSB0" />
     <param name="serial_baudrate" type="int" value="38400" />

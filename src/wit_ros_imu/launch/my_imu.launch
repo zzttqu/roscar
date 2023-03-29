@@ -1,13 +1,13 @@
 
 <!-- open imu and rviz -->
 <launch>
-
+    <arg name="port" default="ttyUSB2"/>
     <!-- imu type, default normal -->
-    <arg name="type" default="normal" doc="type [normal, modbus]" />
+    <!-- <arg name="type" default="normal" doc="type [normal, modbus]" /> -->
 
     <!-- imu python -->
-    <node pkg="wit_ros_imu" type="wit_$(arg type)_ros.py" name="imu" output="screen">
-        <param name="port" type="str" value="/dev/ttyUSB2" />
+    <node pkg="wit_ros_imu" type="wit_normal_ros.py" name="imu" output="screen">
+        <param name="port" type="str" value="/dev/$(arg port)" />
         <param name="baud" type="int" value="9600" />
         <remap from="/wit/imu" to="/imu/data" />
     </node>
