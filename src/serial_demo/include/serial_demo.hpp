@@ -66,7 +66,7 @@ private:
 public:
     STM32_Serial(ros::NodeHandle &node);
     int Serial_Init(string port,int baudrate);
-    int Serial_Close(char port[]);
+    int Serial_Close();
     int Send_Speed_Msg();
     bool Get_Data();
     void Publish_Odom();

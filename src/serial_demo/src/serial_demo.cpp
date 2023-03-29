@@ -32,14 +32,14 @@ static void Speed_Trans(AGV_Vel agv_vel)
         // 转向判断
         MOTOR_Parameters[i].direction_Target = (MOTOR_Parameters[i].target > 0) ? 1 : -1;
     }
-    std::ostringstream ss;
-    for (int i = 0; i < 4; i++)
-    {
-        ss << "\n"
-           << static_cast<char>('1' + i) << "电机preloader:" << MOTOR_Parameters[i].preloader.i_data
-           << "方向为:" << MOTOR_Parameters[i].direction_Target;
-    }
-    ROS_INFO_STREAM(ss.str());
+    // std::ostringstream ss;
+    // for (int i = 0; i < 4; i++)
+    // {
+    //     ss << "\n"
+    //        << static_cast<char>('1' + i) << "电机preloader:" << MOTOR_Parameters[i].preloader.i_data
+    //        << "方向为:" << MOTOR_Parameters[i].direction_Target;
+    // }
+    // ROS_INFO_STREAM(ss.str());
 };
 // 正向运动学解算
 static AGV_Vel Encoder_Trans()
@@ -57,14 +57,14 @@ static AGV_Vel Encoder_Trans()
     agv_vel.X = int(agv_vel.X / 1000.0 * 100) / 100.0;
     agv_vel.Y = int(agv_vel.Y / 1000.0 * 100) / 100.0;
     agv_vel.Yaw = int(agv_vel.Yaw * 100) / 100.0;
-    std::ostringstream ss;
-    for (int i = 0; i < 4; i++)
-    {
-        ss << " "
-           << MOTOR_Parameters[i].encoder.i_data;
-    }
-    ROS_INFO_STREAM(ss.str());
-    ROS_INFO_STREAM("X速度为" << agv_vel.X << " Y速度为" << agv_vel.Y << " Z转角为" << agv_vel.Yaw);
+    // std::ostringstream ss;
+    // for (int i = 0; i < 4; i++)
+    // {
+    //     ss << " "
+    //        << MOTOR_Parameters[i].encoder.i_data;
+    // }
+    // ROS_INFO_STREAM(ss.str());
+    // ROS_INFO_STREAM("X速度为" << agv_vel.X << " Y速度为" << agv_vel.Y << " Z转角为" << agv_vel.Yaw);
     return agv_vel;
 }
 
@@ -229,7 +229,7 @@ int STM32_Serial::Serial_Init(string port,int baudrate)
         return -1;
     }
 }
-int STM32_Serial::Serial_Close(char port[])
+int STM32_Serial::Serial_Close()
 {
     try
     {
