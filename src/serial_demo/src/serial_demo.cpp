@@ -351,7 +351,6 @@ void STM32_Serial::V_CallBack(const geometry_msgs::Twist::ConstPtr &msg)
     float Y = msg.get()->linear.y * 1000;
     double Yaw = msg.get()->angular.z; // 这个是rad/s
     agv_nav_vel = {X, Y, Yaw};
-    ROS_INFO_STREAM("X速度为" << agv_nav_vel.X << "Y速度为" << agv_nav_vel.Y << "Z转动速度为" << agv_nav_vel.Yaw);
     Send_Speed_Trans();
     Send_Speed_Msg();
 }

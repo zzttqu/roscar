@@ -12,9 +12,10 @@
     <arg name="port" value="ttyUSB0"/>
   </include>
   <!-- carto建图节点-->
-  <include file="$(find cartographer_ros)/launch/my_carto.launch">
-    
+  <include file="$(find cartographer_ros)/launch/my_carto_local.launch">
+    <arg name="load_state_filename" value="/home/zty/Downloads/maps/mymap.pbstream"></arg>
   </include>
   <include file="$(find my_assamble_pkg)/launch/my_navigation.launch"></include>
-  <include file="$(find carmodel)/launch/rviz.launch"/>
+  <include file="$(find my_assamble_pkg)/launch/rviz.launch"/>
+  <!-- <node name="map_server" pkg="map_server" type="map_server" args="$(find my_assamble_pkg)/maps/mymap.pgm"/> -->
 </launch>
