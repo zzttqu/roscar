@@ -7,9 +7,13 @@
   <include file="$(find wit_ros_imu)/launch/my_imu.launch">
     <arg name="port" value="ttyUSB2"/>
   </include>
-  <node pkg="serial_demo" type="serial_demo" output="screen" name="STM32serialNode">
-    <param name="serial_port" type="string" value="/dev/ttyUSB0" />
-    <param name="serial_baudrate" type="int" value="38400" />
-  </node>
+  <!-- 串口通讯节点-->
+  <include file="$(find serial_demo)/launch/my_serial.launch">
+    <arg name="port" value="ttyUSB0"/>
+  </include>
+  <!-- carto建图节点-->
+  <include file="$(find cartographer_ros)/launch/my_carto.launch">
+    
+  </include>
   <include file="$(find carmodel)/launch/rviz.launch"/>
 </launch>
