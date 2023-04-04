@@ -1,4 +1,4 @@
-#include "serial_demo.hpp"
+#include "serial_node.hpp"
 using namespace std;
 
 // sudo chmod 666 /dev/ttyUSB0
@@ -17,26 +17,26 @@ char port[] = "/dev/ttyUSB0";
 static void Speed_Trans(AGV_Vel agv_vel)
 {
     // 运动学解算出四个轮子的线速度
-    MOTOR_Parameters[0].target = agv_vel.X - agv_vel.Y - agv_vel.Yaw * (wheel_center_x + wheel_center_y);
-    MOTOR_Parameters[1].target = agv_vel.X + agv_vel.Y + agv_vel.Yaw * (wheel_center_x + wheel_center_y);
-    MOTOR_Parameters[2].target = agv_vel.X - agv_vel.Y + agv_vel.Yaw * (wheel_center_x + wheel_center_y);
-    MOTOR_Parameters[3].target = agv_vel.X + agv_vel.Y - agv_vel.Yaw * (wheel_center_x + wheel_center_y);
+    MOTOR_Parameters[0].target_speed = agv_vel.X - agv_vel.Y - agv_vel.Yaw * (wheel_center_x + wheel_center_y);
+    MOTOR_Parameters[1].target_speed = agv_vel.X + agv_vel.Y + agv_vel.Yaw * (wheel_center_x + wheel_center_y);
+    MOTOR_Parameters[2].target_speed = agv_vel.X - agv_vel.Y + agv_vel.Yaw * (wheel_center_x + wheel_center_y);
+    MOTOR_Parameters[3].target_speed = agv_vel.X + agv_vel.Y - agv_vel.Yaw * (wheel_center_x + wheel_center_y);
     for (uint8_t i = 0; i < 4; i++)
     {
         // 要先变为角速度值，再转化为preloader数值,-1要在abs外边
-        MOTOR_Parameters[i].preloader.i_data = abs(PI * wheel_r_mm * 1000 / MOTOR_Parameters[i].target) - 1;
-        if (MOTOR_Parameters[i].preloader.i_data == 0)
+        MOTOR_Parameters[i].preloader = abs(PI * wheel_r_mm * 1000 / MOTOR_Parameters[i].target_speed) - 1;
+        if (MOTOR_Parameters[i].preloader == 0)
         {
-            MOTOR_Parameters[i].preloader.i_data = 15000;
+            MOTOR_Parameters[i].preloader = 15000;
         }
         // 转向判断
-        MOTOR_Parameters[i].direction_Target = (MOTOR_Parameters[i].target > 0) ? 1 : -1;
+        MOTOR_Parameters[i].direction_Target = (MOTOR_Parameters[i].target_speed > 0) ? 1 : -1;
     }
     // std::ostringstream ss;
     // for (int i = 0; i < 4; i++)
     // {
     //     ss << "\n"
-    //        << static_cast<char>('1' + i) << "电机preloader:" << MOTOR_Parameters[i].preloader.i_data
+    //        << static_cast<char>('1' + i) << "电机preloader:" << MOTOR_Parameters[i].preloader
     //        << "方向为:" << MOTOR_Parameters[i].direction_Target;
     // }
     // ROS_INFO_STREAM(ss.str());
@@ -48,11 +48,11 @@ static AGV_Vel Encoder_Trans()
     // 对编码器数据进行卡尔曼滤波
     // for (size_t i = 0; i < 4; i++)
     // {
-    //     MOTOR_Parameters[i].encoder.i_data = static_cast<short>(MOTOR_Parameters->kf.filter(MOTOR_Parameters[i].encoder.i_data));
+    //     MOTOR_Parameters[i].encoder = static_cast<short>(MOTOR_Parameters->kf.filter(MOTOR_Parameters[i].encoder));
     // }
-    agv_vel.X = 2 * PI * wheel_r_mm * (MOTOR_Parameters[0].encoder.i_data + MOTOR_Parameters[1].encoder.i_data + MOTOR_Parameters[2].encoder.i_data + MOTOR_Parameters[3].encoder.i_data) / 4.0 / dt / encoder_num;
-    agv_vel.Y = 2 * PI * wheel_r_mm * (-MOTOR_Parameters[0].encoder.i_data - MOTOR_Parameters[1].encoder.i_data + MOTOR_Parameters[2].encoder.i_data + MOTOR_Parameters[3].encoder.i_data) / 4.0 / dt / encoder_num;
-    agv_vel.Yaw = 2 * PI * wheel_r_mm * ((-MOTOR_Parameters[0].encoder.i_data + MOTOR_Parameters[1].encoder.i_data + MOTOR_Parameters[2].encoder.i_data - MOTOR_Parameters[3].encoder.i_data) / 4.0 / dt / (wheel_center_x + wheel_center_y) / encoder_num);
+    agv_vel.X = 2 * PI * wheel_r_mm * (MOTOR_Parameters[0].encoder + MOTOR_Parameters[1].encoder + MOTOR_Parameters[2].encoder + MOTOR_Parameters[3].encoder) / 4.0 / dt / encoder_num;
+    agv_vel.Y = 2 * PI * wheel_r_mm * (-MOTOR_Parameters[0].encoder - MOTOR_Parameters[1].encoder + MOTOR_Parameters[2].encoder + MOTOR_Parameters[3].encoder) / 4.0 / dt / encoder_num;
+    agv_vel.Yaw = 2 * PI * wheel_r_mm * ((-MOTOR_Parameters[0].encoder + MOTOR_Parameters[1].encoder + MOTOR_Parameters[2].encoder - MOTOR_Parameters[3].encoder) / 4.0 / dt / (wheel_center_x + wheel_center_y) / encoder_num);
     // 转换为m
     agv_vel.X = int(agv_vel.X / 1000.0 * 100) / 100.0;
     agv_vel.Y = int(agv_vel.Y / 1000.0 * 100) / 100.0;
@@ -61,7 +61,7 @@ static AGV_Vel Encoder_Trans()
     // for (int i = 0; i < 4; i++)
     // {
     //     ss << " "
-    //        << MOTOR_Parameters[i].encoder.i_data;
+    //        << MOTOR_Parameters[i].encoder;
     // }
     // ROS_INFO_STREAM(ss.str());
     // ROS_INFO_STREAM("X速度为" << agv_vel.X << " Y速度为" << agv_vel.Y << " Z转角为" << agv_vel.Yaw);
@@ -82,15 +82,16 @@ void STM32_Serial::Read_Data(uint8_t resBuff[], int buff_size)
                 if (ccbuff[i] == HEADER)
                 {
                     uint8_t CRC = 0x00;
-                    for (size_t j = 0; j < 16; j++)
+                    for (size_t j = 0; j < 25; j++)
                     {
                         resBuff[j] = ccbuff[i + j];
                     }
-                    for (size_t i = 0; i < 10; i++)
+                    // todo 这里需要修改校验长度为25
+                    for (size_t i = 0; i < 26; i++)
                     {
                         CRC = resBuff[i] ^ CRC;
                     }
-                    if (CRC == resBuff[10])
+                    if (CRC == resBuff[26])
                     {
 
                         return;
@@ -98,7 +99,7 @@ void STM32_Serial::Read_Data(uint8_t resBuff[], int buff_size)
                     else
                     {
                         std::ostringstream ss;
-                        for (int i = 0; i < 16; i++)
+                        for (int i = 0; i < 26; i++)
                         {
                             ss << " " << hex
                                << (short)resBuff[i];
@@ -124,24 +125,37 @@ void STM32_Serial::Read_Data(uint8_t resBuff[], int buff_size)
 
 void STM32_Serial::Recieve_Speed_Trans()
 {
-    for (size_t i = 2; i < 10; i++)
+    // for (size_t i = 2; i < 10; i++)
+    // {
+    //     if (i < 4)
+    //     {
+    //         MOTOR_Parameters[0].encoder.byte[(i - 2) % 2] = Recieve_Buffer[i];
+    //     }
+    //     else if (3 < i && i < 6)
+    //     {
+    //         MOTOR_Parameters[1].encoder.byte[(i - 2) % 2] = Recieve_Buffer[i];
+    //     }
+    //     else if (5 < i && i < 8)
+    //     {
+    //         MOTOR_Parameters[2].encoder.byte[(i - 2) % 2] = Recieve_Buffer[i];
+    //     }
+    //     else if (7 < i && i < 10)
+    //     {
+    //         MOTOR_Parameters[3].encoder.byte[(i - 2) % 2] = Recieve_Buffer[i];
+    //     }
+    // }
+    for (size_t i = 0; i < 4; i++)
     {
-        if (i < 4)
-        {
-            MOTOR_Parameters[0].encoder.byte[(i - 2) % 2] = Recieve_Buffer[i];
-        }
-        else if (3 < i && i < 6)
-        {
-            MOTOR_Parameters[1].encoder.byte[(i - 2) % 2] = Recieve_Buffer[i];
-        }
-        else if (5 < i && i < 8)
-        {
-            MOTOR_Parameters[2].encoder.byte[(i - 2) % 2] = Recieve_Buffer[i];
-        }
-        else if (7 < i && i < 10)
-        {
-            MOTOR_Parameters[3].encoder.byte[(i - 2) % 2] = Recieve_Buffer[i];
-        }
+        size_t base_idx = i * 6 + 2;
+        short encoder;
+        short voltage;
+        short current;
+        memcpy(Recieve_Buffer + base_idx, &encoder, sizeof(encoder));
+        memcpy(Recieve_Buffer + base_idx + 2, &voltage, sizeof(encoder));
+        memcpy(Recieve_Buffer + base_idx + 4, &current, sizeof(encoder));
+        MOTOR_Parameters[i].current = current;
+        MOTOR_Parameters[i].encoder = encoder;
+        MOTOR_Parameters[i].voltage = voltage;
     }
 }
 // STM32设置
@@ -171,36 +185,45 @@ void STM32_Serial::Send_Speed_Trans()
     // 赋值到buffer中进行传输，四bit为一个float
     Speed_Trans(agv_nav_vel);
     Send_Buffer[0] = HEADER;
-    for (size_t i = 2; i < 14; i++)
+    // for (size_t i = 2; i < 14; i++)
+    // {
+    //     if (i < 4)
+    //     {
+    //         Send_Buffer[i] = MOTOR_Parameters[0].preloader.byte[(i % 2) ? 0 : 1];
+    //     }
+    //     else if (i < 6)
+    //     {
+    //         Send_Buffer[i] = MOTOR_Parameters[1].preloader.byte[(i % 2) ? 0 : 1];
+    //     }
+    //     else if (i < 8)
+    //     {
+    //         Send_Buffer[i] = MOTOR_Parameters[2].preloader.byte[(i % 2) ? 0 : 1];
+    //     }
+    //     else if (i < 10)
+    //     {
+    //         Send_Buffer[i] = MOTOR_Parameters[3].preloader.byte[(i % 2) ? 0 : 1];
+    //     }
+    //     else if (i < 14)
+    //     {
+    //         // Send_Buffer[i] = MOTOR_Parameters[(i - 2) % 4].direction_Target;
+    //     }
+    //}
+    for (size_t i = 0; i < 4; i++)
     {
-        if (i < 4)
-        {
-            Send_Buffer[i] = MOTOR_Parameters[0].preloader.byte[(i % 2) ? 0 : 1];
-        }
-        else if (3 < i && i < 6)
-        {
-            Send_Buffer[i] = MOTOR_Parameters[1].preloader.byte[(i % 2) ? 0 : 1];
-        }
-        else if (5 < i && i < 8)
-        {
-            Send_Buffer[i] = MOTOR_Parameters[2].preloader.byte[(i % 2) ? 0 : 1];
-        }
-        else if (7 < i && i < 10)
-        {
-            Send_Buffer[i] = MOTOR_Parameters[3].preloader.byte[(i % 2) ? 0 : 1];
-        }
-        else if (9 < i && i < 14)
-        {
-            Send_Buffer[i] = MOTOR_Parameters[(i - 2) % 4].direction_Target;
-        }
+        size_t base_idx = i * 4 + 2;
+        short preloader = MOTOR_Parameters[i].preloader;
+        short direction = MOTOR_Parameters[i].direction_Target;
+        memcpy(Send_Buffer + base_idx, &preloader, sizeof(preloader));
+        memcpy(Send_Buffer + base_idx + 2, &direction, sizeof(direction));
     }
+
     uint8_t CRC = 0x00;
-    for (size_t i = 0; i < 14; i++)
+    for (size_t i = 0; i < 18; i++)
     {
         CRC = Send_Buffer[i] ^ CRC;
     }
-    Send_Buffer[14] = CRC;
-    Send_Buffer[15] = TAIL;
+    Send_Buffer[18] = CRC;
+    Send_Buffer[19] = TAIL;
 
     // std::ostringstream ss;
     // for (int i = 0; i < 16; i++)
@@ -211,7 +234,7 @@ void STM32_Serial::Send_Speed_Trans()
     // ROS_INFO_STREAM(ss.str());
 }
 // 串口初始化
-int STM32_Serial::Serial_Init(string port,int baudrate)
+int STM32_Serial::Serial_Init(string port, int baudrate)
 {
     try
     {

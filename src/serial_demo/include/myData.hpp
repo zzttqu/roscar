@@ -1,11 +1,16 @@
+/*
+ * @Author: zzttqu zzttqu@gmail.com
+ * @Date: 2023-03-28 11:55:46
+ * @LastEditors: zzttqu zzttqu@gmail.com
+ * @LastEditTime: 2023-04-04 14:14:46
+ * @FilePath: /roscar/src/serial_demo/include/myData.hpp
+ * @Description: 
+ * 一个大学生的毕业设计
+ */
 #ifndef myData_H
 #define myData_H
 #include "KalmanFilter.hpp"
-typedef union _uart_Float_
-{
-    short i_data;
-    uint8_t byte[2];
-} uart_INT;
+
 typedef struct _AGV_Vel_
 {
     float X;
@@ -23,11 +28,13 @@ typedef struct _AGV_Pos_
 
 typedef struct _Motor_Parameter_
 {
-  float target;
-  uart_INT preloader;
-  int direction_Target;
-  uart_INT encoder;
-  int direction_Now;
-  KalmanFilter kf;
+  float target_speed;
+  short preloader;
+  short direction_Target;
+  short encoder;
+  short direction_Now;
+  short voltage;
+  short current;
+  short temperature;
 } Motor_Parameter;
 #endif
