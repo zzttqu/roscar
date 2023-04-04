@@ -86,12 +86,12 @@ void STM32_Serial::Read_Data(uint8_t resBuff[], int buff_size)
                     {
                         resBuff[j] = ccbuff[i + j];
                     }
-                    // todo 这里需要修改校验长度为25
-                    for (size_t i = 0; i < 26; i++)
+                    // todo 这里需要修改校验长度为24
+                    for (size_t i = 0; i < 30; i++)
                     {
                         CRC = resBuff[i] ^ CRC;
                     }
-                    if (CRC == resBuff[26])
+                    if (CRC == resBuff[30])
                     {
 
                         return;
@@ -99,7 +99,7 @@ void STM32_Serial::Read_Data(uint8_t resBuff[], int buff_size)
                     else
                     {
                         std::ostringstream ss;
-                        for (int i = 0; i < 26; i++)
+                        for (int i = 0; i < 30; i++)
                         {
                             ss << " " << hex
                                << (short)resBuff[i];
@@ -218,12 +218,12 @@ void STM32_Serial::Send_Speed_Trans()
     }
 
     uint8_t CRC = 0x00;
-    for (size_t i = 0; i < 18; i++)
+    for (size_t i = 0; i < 30; i++)
     {
         CRC = Send_Buffer[i] ^ CRC;
     }
-    Send_Buffer[18] = CRC;
-    Send_Buffer[19] = TAIL;
+    Send_Buffer[30] = CRC;
+    Send_Buffer[31] = TAIL;
 
     // std::ostringstream ss;
     // for (int i = 0; i < 16; i++)
@@ -294,10 +294,9 @@ int STM32_Serial::Send_Speed_Msg()
 bool STM32_Serial::Get_Data()
 {
     Read_Data(Recieve_Buffer, sizeof(Recieve_Buffer)); // 通过串口读取下位机发送过来的数据
-    Recieve_Speed_Trans();
-    if (Recieve_Buffer[0] == HEADER && Recieve_Buffer[11] == TAIL) // 验证数据包的帧尾
+    if (Recieve_Buffer[0] == HEADER && Recieve_Buffer[31] == TAIL) // 验证数据包的帧尾
     {
-
+        Recieve_Speed_Trans();
         agv_encoder_vel = Encoder_Trans();
         // ROS_INFO("agv速度为x=%.3f y=%.3f z=%.3f", agv_encoder_vel.X, agv_encoder_vel.Y, agv_encoder_vel.Yaw);
         se.flush();
