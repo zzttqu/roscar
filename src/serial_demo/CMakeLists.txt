@@ -129,10 +129,10 @@ include_directories(
 add_library(
    includeDir
    src/KalmanFilter.cpp
-   src/serial_demo.cpp
+   src/serial_node.cpp
    include/myData.hpp
    include/KalmanFilter.hpp
-   include/serial_demo.hpp
+   include/serial_node.hpp
 )
 
 ## Add cmake target dependencies of the library

@@ -1,4 +1,4 @@
-#include "serial_demo.hpp"
+#include "serial_node.hpp"
 
 int main(int argc, char *argv[])
 {
