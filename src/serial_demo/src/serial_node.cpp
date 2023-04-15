@@ -10,7 +10,7 @@ AGV_Vel agv_nav_vel;
 int wheel_center_x = 250;
 int wheel_center_y = 250;
 serial::Serial se;
-char port[] = "/dev/ttyUSB0";
+
 // uint8_t=unsigned char等价关系
 // # TODO 完成设置代码
 
@@ -41,59 +41,37 @@ static void Speed_Trans(AGV_Vel agv_vel)
     // }
     // ROS_INFO_STREAM(ss.str());
 };
-// 正向运动学解算
-static AGV_Vel Encoder_Trans()
-{
-    AGV_Vel agv_vel;
-    // 对编码器数据进行卡尔曼滤波
-    // for (size_t i = 0; i < 4; i++)
-    // {
-    //     MOTOR_Parameters[i].encoder = static_cast<short>(MOTOR_Parameters->kf.filter(MOTOR_Parameters[i].encoder));
-    // }
-    agv_vel.X = 2 * PI * wheel_r_mm * (MOTOR_Parameters[0].encoder + MOTOR_Parameters[1].encoder + MOTOR_Parameters[2].encoder + MOTOR_Parameters[3].encoder) / 4.0 / dt / encoder_num;
-    agv_vel.Y = 2 * PI * wheel_r_mm * (-MOTOR_Parameters[0].encoder - MOTOR_Parameters[1].encoder + MOTOR_Parameters[2].encoder + MOTOR_Parameters[3].encoder) / 4.0 / dt / encoder_num;
-    agv_vel.Yaw = 2 * PI * wheel_r_mm * ((-MOTOR_Parameters[0].encoder + MOTOR_Parameters[1].encoder + MOTOR_Parameters[2].encoder - MOTOR_Parameters[3].encoder) / 4.0 / dt / (wheel_center_x + wheel_center_y) / encoder_num);
-    // 转换为m
-    agv_vel.X = int(agv_vel.X / 1000.0 * 100) / 100.0;
-    agv_vel.Y = int(agv_vel.Y / 1000.0 * 100) / 100.0;
-    agv_vel.Yaw = int(agv_vel.Yaw * 100) / 100.0;
-    // std::ostringstream ss;
-    // for (int i = 0; i < 4; i++)
-    // {
-    //     ss << " "
-    //        << MOTOR_Parameters[i].encoder;
-    // }
-    // ROS_INFO_STREAM(ss.str());
-    // ROS_INFO_STREAM("X速度为" << agv_vel.X << " Y速度为" << agv_vel.Y << " Z转角为" << agv_vel.Yaw);
-    return agv_vel;
-}
 
 void STM32_Serial::Read_Data(uint8_t resBuff[], int buff_size)
 {
     uint8_t ccbuff[64];
-    if (se.available())
+    if (se.available() > 0)
     {
         try
         {
             se.read(ccbuff, se.available());
-
-            for (size_t i = 0; i < 64; i++)
+            for (size_t i = 0; i < 32; i++)
             {
                 if (ccbuff[i] == HEADER)
                 {
                     uint8_t CRC = 0x00;
-                    for (size_t j = 0; j < 25; j++)
+                    for (size_t j = 0; j < 32; j++)
                     {
                         resBuff[j] = ccbuff[i + j];
                     }
-                    // todo 这里需要修改校验长度为24
                     for (size_t i = 0; i < 30; i++)
                     {
                         CRC = resBuff[i] ^ CRC;
                     }
+                    // std::ostringstream ss;
+                    // for (int i = 0; i < 32; i++)
+                    // {
+                    //     ss << " " << hex
+                    //        << (short)resBuff[i];
+                    // }
+                    // ROS_INFO_STREAM("接受数据校验未通过" << ss.str());
                     if (CRC == resBuff[30])
                     {
-
                         return;
                     }
                     else
@@ -122,41 +100,49 @@ void STM32_Serial::Read_Data(uint8_t resBuff[], int buff_size)
     }
     memset(ccbuff, 0x00, 64);
 }
-
-void STM32_Serial::Recieve_Speed_Trans()
+// 数据转换和正向运动学解算
+AGV_Vel STM32_Serial::Recieve_Speed_Trans(uint8_t Recieve_Buffer[])
 {
-    // for (size_t i = 2; i < 10; i++)
-    // {
-    //     if (i < 4)
-    //     {
-    //         MOTOR_Parameters[0].encoder.byte[(i - 2) % 2] = Recieve_Buffer[i];
-    //     }
-    //     else if (3 < i && i < 6)
-    //     {
-    //         MOTOR_Parameters[1].encoder.byte[(i - 2) % 2] = Recieve_Buffer[i];
-    //     }
-    //     else if (5 < i && i < 8)
-    //     {
-    //         MOTOR_Parameters[2].encoder.byte[(i - 2) % 2] = Recieve_Buffer[i];
-    //     }
-    //     else if (7 < i && i < 10)
-    //     {
-    //         MOTOR_Parameters[3].encoder.byte[(i - 2) % 2] = Recieve_Buffer[i];
-    //     }
-    // }
+    AGV_Vel agv_vel;
     for (size_t i = 0; i < 4; i++)
     {
         size_t base_idx = i * 6 + 2;
         short encoder;
         short voltage;
         short current;
-        memcpy(Recieve_Buffer + base_idx, &encoder, sizeof(encoder));
-        memcpy(Recieve_Buffer + base_idx + 2, &voltage, sizeof(encoder));
-        memcpy(Recieve_Buffer + base_idx + 4, &current, sizeof(encoder));
+        memcpy(&encoder, Recieve_Buffer + base_idx, sizeof(encoder));
+        memcpy(&voltage, Recieve_Buffer + base_idx + 2, sizeof(encoder));
+        memcpy(&current, Recieve_Buffer + base_idx + 4, sizeof(encoder));
         MOTOR_Parameters[i].current = current;
         MOTOR_Parameters[i].encoder = encoder;
         MOTOR_Parameters[i].voltage = voltage;
+        //ROS_INFO("%hx %hx %hx %hx", Recieve_Buffer[base_idx], Recieve_Buffer[base_idx + 1], Recieve_Buffer[base_idx + 2], Recieve_Buffer[base_idx + 3]);
     }
+    // 对编码器数据进行卡尔曼滤波
+    // for (size_t i = 0; i < 4; i++)
+    // {
+    //     MOTOR_Parameters[i].encoder = static_cast<short>(MOTOR_Parameters->kf.filter(MOTOR_Parameters[i].encoder));
+    // }
+    agv_vel.X = 2 * PI * wheel_r_mm * (MOTOR_Parameters[0].encoder + MOTOR_Parameters[1].encoder + MOTOR_Parameters[2].encoder + MOTOR_Parameters[3].encoder) / 4.0 / dt / encoder_num;
+    agv_vel.Y = 2 * PI * wheel_r_mm * (-MOTOR_Parameters[0].encoder - MOTOR_Parameters[1].encoder + MOTOR_Parameters[2].encoder + MOTOR_Parameters[3].encoder) / 4.0 / dt / encoder_num;
+    agv_vel.Yaw = 2 * PI * wheel_r_mm * ((-MOTOR_Parameters[0].encoder + MOTOR_Parameters[1].encoder + MOTOR_Parameters[2].encoder - MOTOR_Parameters[3].encoder) / 4.0 / dt / (wheel_center_x + wheel_center_y) / encoder_num);
+    // 转换为m
+    agv_vel.X = int(agv_vel.X / 1000.0 * 100) / 100.0;
+    agv_vel.Y = int(agv_vel.Y / 1000.0 * 100) / 100.0;
+    agv_vel.Yaw = int(agv_vel.Yaw * 100) / 100.0;
+    // std::ostringstream ss;
+    // for (int i = 0; i < 4; i++)
+    // {
+    //     ss << " "
+    //        << MOTOR_Parameters[i].encoder
+    //        << " "
+    //        << MOTOR_Parameters[i].voltage;
+    // }
+    // ROS_INFO_STREAM(ss.str());
+    ROS_INFO_STREAM("X速度为" << agv_vel.X << " Y速度为" << agv_vel.Y << " Z转角为" << agv_vel.Yaw);
+    ROS_INFO_STREAM("1号电机电压为" << MOTOR_Parameters[0].voltage<<" 2号电机电压为" << MOTOR_Parameters[1].voltage<<
+    " 3号电机电压为" << MOTOR_Parameters[2].voltage<<" 4号电机电压为" << MOTOR_Parameters[3].voltage);
+    return agv_vel;
 }
 // STM32设置
 void STM32_Serial::STM32_Set()
@@ -293,11 +279,11 @@ int STM32_Serial::Send_Speed_Msg()
 // 获取串口数据并转化
 bool STM32_Serial::Get_Data()
 {
-    Read_Data(Recieve_Buffer, sizeof(Recieve_Buffer)); // 通过串口读取下位机发送过来的数据
+    Read_Data(Recieve_Buffer, sizeof(Recieve_Buffer));             // 通过串口读取下位机发送过来的数据
     if (Recieve_Buffer[0] == HEADER && Recieve_Buffer[31] == TAIL) // 验证数据包的帧尾
     {
-        Recieve_Speed_Trans();
-        agv_encoder_vel = Encoder_Trans();
+        //  ROS_INFO_STREAM("编码器为"<<MOTOR_Parameters[0].encoder<<" 电压为"<<MOTOR_Parameters[0].voltage<<" 电流为"<<MOTOR_Parameters[0].current);
+        agv_encoder_vel = Recieve_Speed_Trans(Recieve_Buffer);
         // ROS_INFO("agv速度为x=%.3f y=%.3f z=%.3f", agv_encoder_vel.X, agv_encoder_vel.Y, agv_encoder_vel.Yaw);
         se.flush();
         return true;

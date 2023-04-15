@@ -1,7 +1,7 @@
 <launch>
-    <arg name="port" default="ttyUSB1"/>
+    <arg name="port" default="ttyUSB0"/>
     <node pkg="serial_demo" type="serial_demo" output="screen" name="STM32serialNode">
         <param name="serial_port" type="string" value="/dev/$(arg port)" />
-        <param name="serial_baudrate" type="int" value="38400" />
+        <param name="serial_baudrate" type="int" value="115200" />
       </node>
 </launch>

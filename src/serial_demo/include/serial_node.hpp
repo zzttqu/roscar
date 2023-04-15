@@ -41,7 +41,6 @@ extern serial::Serial se;
 extern char port[] ;
 
 static void Speed_Trans(AGV_Vel agv_vel);
-static AGV_Vel Encoder_Trans();
 void MySigintHandler(int sig);
 class STM32_Serial
 {
@@ -58,7 +57,7 @@ private:
     double posx = 0, posy = 0, dx = 0, dy = 0, dz = 0;
 
     void Read_Data(uint8_t resBuff[], int buff_size);
-    void Recieve_Speed_Trans();
+    AGV_Vel Recieve_Speed_Trans(uint8_t Recieve_Buffer[]);
     void STM32_Set();
     void STM32_Stop();
     void Send_Speed_Trans();
