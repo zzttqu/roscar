@@ -58,6 +58,8 @@ TRAJECTORY_BUILDER_2D.real_time_correlative_scan_matcher.translation_delta_cost_
 TRAJECTORY_BUILDER_2D.real_time_correlative_scan_matcher.rotation_delta_cost_weight = 1e-1
 TRAJECTORY_BUILDER_2D.motion_filter.max_distance_meters = 0.05
 TRAJECTORY_BUILDER_2D.motion_filter.max_angle_radians = math.rad(0.3)
+TRAJECTORY_BUILDER_2D.min_z = -0.1
+TRAJECTORY_BUILDER_2D.max_z = 1.5
 
 
 POSE_GRAPH.optimization_problem.huber_scale = 1e2

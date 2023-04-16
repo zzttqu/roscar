@@ -4,9 +4,14 @@
     <!-- <include file="$(find cartographer_ros)/launch/my_carto_local.launch">
       <arg name="load_state_filename" value="/home/zty/Downloads/maps/mymap.pbstream"></arg>
     </include> -->
-    <include file="$(find cartographer_ros)/launch/my_carto.launch">
+    <!-- <include file="$(find cartographer_ros)/launch/my_carto.launch">
      
-    </include>
+    </include> -->
+    <!-- 切换gmapping建图 -->
+    <include file="$(find carmodel)/launch/gmapping.launch" />
+    <!-- 运行move_base节点 -->
+    <include file="$(find carmodel)/launch/amcl.launch"/>
+
     <include file="$(find my_assamble_pkg)/launch/my_navigation.launch"></include>
     <include file="$(find my_assamble_pkg)/launch/rviz.launch"/>
     <!-- <node name="map_server" pkg="map_server" type="map_server" args="$(find my_assamble_pkg)/maps/mymap.pgm"/> -->
@@ -14,4 +19,5 @@
         <arg name="world_name" value="$(find carmodel)/world/box_house.world" />
     </include>
     <node pkg="gazebo_ros" type="spawn_model" name="model" args="-urdf -model my_car -param robot_description"  />
+    <node pkg="multi_agv_sim" type="multi_agv_sim" name="multi_agv_sim"/>
   </launch>

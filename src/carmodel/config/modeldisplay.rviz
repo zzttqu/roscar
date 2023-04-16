@@ -8,6 +8,7 @@ Panels:
         - /Status1
         - /Odometry1/Shape1
         - /Path1
+        - /Path2
       Splitter Ratio: 0.5
     Tree Height: 549
   - Class: rviz/Selection
@@ -137,8 +138,8 @@ Visualization Manager:
     - Alpha: 1
       Autocompute Intensity Bounds: true
       Autocompute Value Bounds:
-        Max Value: 1.3720760345458984
-        Min Value: -3.4249234199523926
+        Max Value: 3.937819004058838
+        Min Value: -3.8358266353607178
         Value: true
       Axis: Y
       Channel Name: x
@@ -171,6 +172,8 @@ Visualization Manager:
           Value: true
         map:
           Value: true
+        multi_center:
+          Value: true
         odom:
           Value: true
         radar_link:
@@ -193,6 +196,8 @@ Visualization Manager:
         map:
           odom:
             base_link:
+              multi_center:
+                {}
               radar_link:
                 {}
               wheel_left_back_link:
@@ -269,6 +274,30 @@ Visualization Manager:
       Topic: /move_base/DWAPlannerROS/global_plan
       Unreliable: false
       Value: true
+    - Alpha: 1
+      Buffer Length: 1
+      Class: rviz/Path
+      Color: 239; 41; 41
+      Enabled: true
+      Head Diameter: 0.30000001192092896
+      Head Length: 0.20000000298023224
+      Length: 0.30000001192092896
+      Line Style: Lines
+      Line Width: 0.029999999329447746
+      Name: Path
+      Offset:
+        X: 0
+        Y: 0
+        Z: 0
+      Pose Color: 255; 85; 255
+      Pose Style: None
+      Queue Size: 10
+      Radius: 0.029999999329447746
+      Shaft Diameter: 0.10000000149011612
+      Shaft Length: 0.10000000149011612
+      Topic: /move_base/GlobalPlanner/plan
+      Unreliable: false
+      Value: true
   Enabled: true
   Global Options:
     Background Color: 48; 48; 48
@@ -297,7 +326,7 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 4.590190887451172
+      Distance: 9.060223579406738
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
