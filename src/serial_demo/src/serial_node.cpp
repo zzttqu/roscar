@@ -116,7 +116,7 @@ AGV_Vel STM32_Serial::Recieve_Speed_Trans(uint8_t Recieve_Buffer[])
         MOTOR_Parameters[i].current = current;
         MOTOR_Parameters[i].encoder = encoder;
         MOTOR_Parameters[i].voltage = voltage;
-        //ROS_INFO("%hx %hx %hx %hx", Recieve_Buffer[base_idx], Recieve_Buffer[base_idx + 1], Recieve_Buffer[base_idx + 2], Recieve_Buffer[base_idx + 3]);
+        // ROS_INFO("%hx %hx %hx %hx", Recieve_Buffer[base_idx], Recieve_Buffer[base_idx + 1], Recieve_Buffer[base_idx + 2], Recieve_Buffer[base_idx + 3]);
     }
     // 对编码器数据进行卡尔曼滤波
     // for (size_t i = 0; i < 4; i++)
@@ -140,8 +140,7 @@ AGV_Vel STM32_Serial::Recieve_Speed_Trans(uint8_t Recieve_Buffer[])
     // }
     // ROS_INFO_STREAM(ss.str());
     ROS_INFO_STREAM("X速度为" << agv_vel.X << " Y速度为" << agv_vel.Y << " Z转角为" << agv_vel.Yaw);
-    ROS_INFO_STREAM("1号电机电压为" << MOTOR_Parameters[0].voltage<<" 2号电机电压为" << MOTOR_Parameters[1].voltage<<
-    " 3号电机电压为" << MOTOR_Parameters[2].voltage<<" 4号电机电压为" << MOTOR_Parameters[3].voltage);
+    ROS_INFO_STREAM("1号电机电压为" << MOTOR_Parameters[0].voltage << " 2号电机电压为" << MOTOR_Parameters[1].voltage << " 3号电机电压为" << MOTOR_Parameters[2].voltage << " 4号电机电压为" << MOTOR_Parameters[3].voltage);
     return agv_vel;
 }
 // STM32设置
@@ -294,7 +293,7 @@ bool STM32_Serial::Get_Data()
 void STM32_Serial::Publish_Odom()
 {
     // 定义tf 对象
-    static tf::TransformBroadcaster odom_broadcaster;
+    static tf2_ros::TransformBroadcaster odom_broadcaster;
     // 定义tf发布时需要的类型消息
     geometry_msgs::TransformStamped odom_trans;
     pub_odom = n.advertise<nav_msgs::Odometry>("/odom", 1000);
@@ -318,7 +317,8 @@ void STM32_Serial::Publish_Odom()
     agv_pos.X += dx;
     agv_pos.Y += dy;
     // 把Z轴转角转换为四元数进行表达
-    geometry_msgs::Quaternion odom_quat = tf::createQuaternionMsgFromYaw(agv_pos.Yaw);
+    tf2::Quaternion qtn;
+    qtn.setRPY(0, 0, agv_pos.Yaw);
 
     // 发布坐标变换父子坐标系
     odom_trans.header.stamp = current_time;
@@ -328,7 +328,10 @@ void STM32_Serial::Publish_Odom()
     odom_trans.transform.translation.x = agv_pos.X; // x坐标
     odom_trans.transform.translation.y = agv_pos.Y; // y坐标
     odom_trans.transform.translation.z = 0;         // z坐标
-    odom_trans.transform.rotation = odom_quat;      // 偏航角
+    odom_trans.transform.rotation.x = qtn.getX();   // 旋转角
+    odom_trans.transform.rotation.y = qtn.getY();
+    odom_trans.transform.rotation.z = qtn.getZ();
+    odom_trans.transform.rotation.w = qtn.getW();
     // 发布tf坐标变换
     odom_broadcaster.sendTransform(odom_trans);
 
@@ -337,7 +340,10 @@ void STM32_Serial::Publish_Odom()
     odom.pose.pose.position.x = agv_pos.X; // 位置
     odom.pose.pose.position.y = agv_pos.Y;
     odom.pose.pose.position.z = 0;
-    odom.pose.pose.orientation = odom_quat; // 姿态，通过Z轴转角转换的四元数
+    odom.pose.pose.orientation.x = qtn.getX(); // 姿态，通过Z轴转角转换的四元数
+    odom.pose.pose.orientation.y = qtn.getY();
+    odom.pose.pose.orientation.z = qtn.getZ();
+    odom.pose.pose.orientation.w = qtn.getW();
 
     odom.child_frame_id = "base_link";                // 里程计TF子坐标
     odom.twist.twist.linear.x = agv_encoder_vel.X;    // X方向速度
@@ -371,7 +377,7 @@ void MySigintHandler(int sig)
     // 这里主要进行退出前的数据保存、内存清理、告知其他节点等工作
     se.write("ASS");
     se.close();
-    ROS_INFO("shutting down!");
+    ROS_INFO("串口节点关闭咯!");
     ros::shutdown();
     exit(0);
 }

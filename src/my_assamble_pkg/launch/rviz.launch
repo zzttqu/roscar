@@ -1,7 +1,6 @@
 <launch>
-    <arg
-      name="model" />
-      <param name="robot_description"  command="$(find xacro)/xacro $(find carmodel)/xacro/carassmble.xacro" />
+    <arg name="model" />
+    <param name="robot_description"  command="$(find xacro)/xacro $(find carmodel)/xacro/carassmble.xacro" />
     <node
       name="joint_state_publisher"
       pkg="joint_state_publisher"
