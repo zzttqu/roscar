@@ -1,0 +1,5 @@
+<robot name="my_car" xmlns:xacro="http://wiki.ros.org/xacro">
+    <xacro:include filename="$(find carmodel)/xacro/agv0/carmodel.xacro"/>
+    <xacro:include filename="$(find carmodel)/xacro/agv0/laser.xacro"/>
+    <xacro:include filename="$(find carmodel)/xacro/agv0/movecar.xacro"/>
+</robot>

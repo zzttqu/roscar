@@ -1,0 +1,322 @@
+<?xml version="1.0"?>
+<robot name="carmodel" xmlns:xacro="http://ros.org/wiki/xacro">
+  <link name="base_link">
+    <inertial>
+      <origin
+        xyz="1.83437767323213E-07 0 0.0757416972495107"
+        rpy="0 0 0" />
+      <mass
+        value="57.5000842612895" />
+      <inertia
+        ixx="1.03705654741234"
+        ixy="-3.82727326264883E-17"
+        ixz="-1.16651163426314E-06"
+        iyy="1.28399979970935"
+        iyz="9.16355064710203E-18"
+        izz="2.0953613948117" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://carmodel/meshes/base_link.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="1 1 1 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://carmodel/meshes/base_link.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <gazebo reference="base_link">
+    <material>
+      Gazebo/Grey
+    </material>
+  </gazebo>
+  <link name="wheel_left_front_link">
+    <inertial>
+      <origin
+        xyz="6.31155165520259E-07 -0.0278661932324391 -4.19737983672203E-07"
+        rpy="0 0 0" />
+      <mass
+        value="0.523991092221911" />
+      <inertia
+        ixx="0.00024114925756414"
+        ixy="4.272300491493E-10"
+        ixz="-1.41228888917539E-09"
+        iyy="0.000363904083939778"
+        iyz="-2.84109198876136E-10"
+        izz="0.000241148073024117" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://carmodel/meshes/wheel_left_front_link.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.298039215686275 0.298039215686275 0.298039215686275 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://carmodel/meshes/wheel_left_front_link.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <gazebo reference="wheel_left_front_link">
+    <material>
+      Gazebo/Yellow
+    </material>
+  </gazebo>
+  <joint name="wheel_left_front_joint"
+    type="continuous">
+    <origin
+      xyz="0.14503 0.27138 0.044"
+      rpy="0 0 0" />
+    <parent
+      link="base_link" />
+    <child
+      link="wheel_left_front_link" />
+    <axis
+      xyz="0 1 0" />
+  </joint>
+  <link name="wheel_left_back_link">
+    <inertial>
+      <origin
+        xyz="6.31155165457808E-07 -0.0278661932324388 -4.19737983646182E-07"
+        rpy="0 0 0" />
+      <mass
+        value="0.523991092221911" />
+      <inertia
+        ixx="0.000241149257564134"
+        ixy="4.27230048844126E-10"
+        ixz="-1.4122888888441E-09"
+        iyy="0.000363904083939771"
+        iyz="-2.84109199606226E-10"
+        izz="0.000241148073024111" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://carmodel/meshes/wheel_left_back_link.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.298039215686275 0.298039215686275 0.298039215686275 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://carmodel/meshes/wheel_left_back_link.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <gazebo reference="wheel_left_back_link">
+    <material>
+      Gazebo/Yellow
+    </material>
+  </gazebo>
+  <joint name="wheel_left_back_joint"
+    type="continuous">
+    <origin
+      xyz="-0.14497 0.27138 0.044"
+      rpy="0 0 0" />
+    <parent
+      link="base_link" />
+    <child
+      link="wheel_left_back_link" />
+    <axis
+      xyz="0 1 0" />
+  </joint>
+  <link name="wheel_right_back_link">
+    <inertial>
+      <origin
+        xyz="-7.43795663067648E-07 0.0268661932324409 -1.45960579910759E-07"
+        rpy="0 0 0" />
+      <mass
+        value="0.523991092220049" />
+      <inertia
+        ixx="0.000241150083189761"
+        ixy="5.03472139870328E-10"
+        ixz="5.78718895051057E-10"
+        iyy="0.000363904083939767"
+        iyz="9.87893865688362E-11"
+        izz="0.000241147247398468" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://carmodel/meshes/wheel_right_back_link.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.298039215686275 0.298039215686275 0.298039215686275 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://carmodel/meshes/wheel_right_back_link.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <gazebo reference="wheel_right_back_link">
+    <material>
+      Gazebo/Yellow
+    </material>
+  </gazebo>
+  <joint name="wheel_right_back_joint"
+    type="continuous">
+    <origin
+      xyz="-0.14497 -0.27038 0.044"
+      rpy="0 0 0" />
+    <parent
+      link="base_link" />
+    <child
+      link="wheel_right_back_link" />
+    <axis
+      xyz="0 -1 0" />
+  </joint>
+  <link name="wheel_right_front_link">
+    <inertial>
+      <origin
+        xyz="-3.14836830273002E-07 0.0278661932324386 6.89500601966028E-07"
+        rpy="0 0 0" />
+      <mass
+        value="0.523991092220466" />
+      <inertia
+        ixx="0.000241147662218502"
+        ixy="2.13099554246371E-10"
+        ixz="-1.1572308694175E-09"
+        iyy="0.000363904083939788"
+        iyz="-4.66725830246774E-10"
+        izz="0.000241149668369752" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://carmodel/meshes/wheel_right_front_link.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.298039215686275 0.298039215686275 0.298039215686275 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://carmodel/meshes/wheel_right_front_link.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <gazebo reference="wheel_right_front_link">
+    <material>
+      Gazebo/Yellow
+    </material>
+  </gazebo>
+  <joint name="wheel_right_front_joint"
+    type="continuous">
+    <origin
+      xyz="0.14503 -0.27138 0.044"
+      rpy="0 0 0" />
+    <parent
+      link="base_link" />
+    <child
+      link="wheel_right_front_link" />
+    <axis
+      xyz="0 -1 0" />
+  </joint>
+  <link name="radar_link">
+    <inertial>
+      <origin
+        xyz="0 0 0.0275"
+        rpy="0 0 0" />
+      <mass
+        value="0.211664805035612" />
+      <inertia
+        ixx="0.000118179516144884"
+        ixy="0"
+        ixz="6.92677814647949E-37"
+        iyy="0.000118179516144884"
+        iyz="1.10220644459236E-36"
+        izz="0.000129644693084313" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://carmodel/meshes/radar_link.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="1 1 1 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://carmodel/meshes/radar_link.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="radar_joint"
+    type="fixed">
+    <origin
+      xyz="0.0750275357424189 0 0.3"
+      rpy="0 0 0" />
+    <parent
+      link="base_link" />
+    <child
+      link="radar_link" />
+    <axis
+      xyz="0 -1 0" />
+  </joint>
+</robot>
