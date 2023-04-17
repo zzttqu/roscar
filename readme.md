@@ -17,3 +17,5 @@
 查看参数服务器的方法rosrun rqt_reconfigure rqt_reconfigure
 crtographer按照官方的方法安装，缺依赖项需要删除。
 通过修改bashrc完成多个工作空间的source
+
+多AGV时创建多个AGV使用了xacro中的命名空间，没用使用tf前缀，要注意xacro中所有话题，link，frame都要加上前缀，包括odom，gmapping建图节点也要加入命名空间。
