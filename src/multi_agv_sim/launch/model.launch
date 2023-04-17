@@ -1,7 +1,7 @@
 <launch>
     <!-- <arg name="model" default="$(env TwoMODEL)" doc="model type [burger, waffle, waffle_pi]" /> -->
-    <arg name="first_agv" default="agv0" />
-    <arg name="second_agv" default="agv1" />
+    <arg name="first_agv" default="agv_0" />
+    <arg name="second_agv" default="agv_1" />
 
     <arg name="first_agv_x_pos" default="0.0" />
     <arg name="first_agv_y_pos" default="0.0" />
@@ -24,31 +24,49 @@
         <node pkg="robot_state_publisher" type="robot_state_publisher" name="robot_state_publisher"
             output="screen">
             <param name="publish_frequency" type="double" value="50.0" />
-            <param name="tf_prefix" value="$(arg first_agv)" />
+            <!-- <param name="tf_prefix" value="$(arg first_agv)" /> -->
         </node>
         <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher">
         </node>
         <param name="robot_description"
-            command="$(find xacro)/xacro $(find carmodel)/xacro/$(arg first_agv)/carassmble.xacro" />
+            command="$(find xacro)/xacro --inorder $(find carmodel)/xacro/$(arg second_agv)/carassmble.xacro ns:=$(arg first_agv)" />
         <node name="spawn_urdf" pkg="gazebo_ros" type="spawn_model"
             args="-urdf -model $(arg first_agv) -x $(arg first_agv_x_pos) -y $(arg first_agv_y_pos) -z $(arg first_agv_z_pos) -Y $(arg first_agv_yaw) -param robot_description" />
+        <!-- 切换gmapping建图 -->
+        <include file="$(find carmodel)/launch/multi_gmapping.launch">
+            <arg name="ns" value="$(arg first_agv)" />
+        </include>
+        <!-- 运行move_base节点 -->
+        <include file="$(find carmodel)/launch/amcl.launch" />
+        <node
+            name="rviz"
+            pkg="rviz"
+            type="rviz"
+            args="-d $(find carmodel)/config/multimodel0.rviz" />
     </group>
     <group ns="$(arg second_agv)">
         <node pkg="robot_state_publisher" type="robot_state_publisher" name="robot_state_publisher"
             output="screen">
             <param name="publish_frequency" type="double" value="50.0" />
-            <param name="tf_prefix" value="$(arg second_agv)" />
+            <!-- <param name="tf_prefix" value="$(arg second_agv)" /> -->
         </node>
         <param name="robot_description"
-            command="$(find xacro)/xacro $(find carmodel)/xacro/$(arg second_agv)/carassmble.xacro" />
+            command="$(find xacro)/xacro --inorder $(find carmodel)/xacro/$(arg second_agv)/carassmble.xacro ns:=$(arg second_agv)" />
         <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher">
         </node>
         <node name="spawn_urdf" pkg="gazebo_ros" type="spawn_model"
             args="-urdf -model $(arg second_agv) -x $(arg second_agv_x_pos) -y $(arg second_agv_y_pos) -z $(arg second_agv_z_pos) -Y $(arg second_agv_yaw) -param robot_description" />
+        <!-- 切换gmapping建图 -->
+        <include file="$(find carmodel)/launch/multi_gmapping.launch">
+            <arg name="ns" value="$(arg second_agv)" />
+        </include>
+        <!-- 运行move_base节点 -->
+        <include file="$(find carmodel)/launch/amcl.launch" />
+        <node
+            name="rviz"
+            pkg="rviz"
+            type="rviz"
+            args="-d $(find carmodel)/config/multimodel1.rviz" />
     </group>
-    <node
-      name="rviz"
-      pkg="rviz"
-      type="rviz"
-      args="-d $(find carmodel)/config/multimodel.rviz" />
+    <!-- <include file="$(find multi_agv_sim)/launch/multi_maps_merge.launch"></include> -->
 </launch>

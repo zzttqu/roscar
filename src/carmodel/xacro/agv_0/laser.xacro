@@ -56,7 +56,7 @@
 				</ray>
 				<plugin name="gazebo_laser" filename="libgazebo_ros_laser.so">
 					<topicName>scan</topicName>
-					<frameName>agv0/laser_link</frameName>
+					<frameName>laser_link</frameName>
 				</plugin>
 			</sensor>
 		</gazebo>

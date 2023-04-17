@@ -32,7 +32,7 @@
             <leftRearJoint>wheel_left_back_link</leftRearJoint>
             <rightRearJoint>wheel_right_back_link</rightRearJoint>
             <odometryRate>50.0</odometryRate>
-            <robotBaseFrame>agv0/base_link</robotBaseFrame>
+            <robotBaseFrame>base_link</robotBaseFrame>
             <broadcastTF>1</broadcastTF>
         </plugin>
     </gazebo>
