@@ -8,8 +8,8 @@
     <arg name="first_agv_z_pos" default=" 0.0" />
     <arg name="first_agv_yaw" default=" 0.0" />
 
-    <arg name="second_agv_x_pos" default=" 0.0" />
-    <arg name="second_agv_y_pos" default="-1.0" />
+    <arg name="second_agv_x_pos" default=" 3.0" />
+    <arg name="second_agv_y_pos" default="2.0" />
     <arg name="second_agv_z_pos" default=" 0.0" />
     <arg name="second_agv_yaw" default=" 0.0" />
     <include file="$(find gazebo_ros)/launch/empty_world.launch">
@@ -36,10 +36,7 @@
         <include file="$(find carmodel)/launch/multi_gmapping.launch">
             <arg name="ns" value="$(arg first_agv)" />
         </include>
-        <node
-            name="rviz"
-            pkg="rviz"
-            type="rviz"
+        <node name="rviz" pkg="rviz" type="rviz"
             args="-d $(find carmodel)/config/multimodel0.rviz" />
         <include file="$(find my_assamble_pkg)/launch/my_multi_navigation.launch">
             <arg name="ns" value="$(arg first_agv)" />
@@ -58,17 +55,21 @@
         <node name="spawn_urdf" pkg="gazebo_ros" type="spawn_model"
             args="-urdf -model $(arg second_agv) -x $(arg second_agv_x_pos) -y $(arg second_agv_y_pos) -z $(arg second_agv_z_pos) -Y $(arg second_agv_yaw) -param robot_description" />
         <!-- 切换gmapping建图 -->
-        <include file="$(find carmodel)/launch/multi_gmapping.launch">
+        <!-- <include file="$(find carmodel)/launch/multi_gmapping.launch">
             <arg name="ns" value="$(arg second_agv)" />
-        </include>
-        <node
-            name="rviz"
-            pkg="rviz"
-            type="rviz"
+        </include> -->
+        <node name="rviz" pkg="rviz" type="rviz"
             args="-d $(find carmodel)/config/multimodel1.rviz" />
-        <include file="$(find my_assamble_pkg)/launch/my_multi_navigation.launch">
+        <!-- <include file="$(find my_assamble_pkg)/launch/my_multi_navigation.launch">
             <arg name="ns" value="$(arg second_agv)" />
-        </include>
+        </include> -->
     </group>
+
+
+    <node pkg="multi_agv_sim" type="tf_listener" name="tf_listener" output="screen"/>
+    <!-- <node pkg="multi_agv_sim" type="agv_tf" name="agv_tf" output="screen"/> -->
+    <node pkg="tf" type="static_transform_publisher"
+        name="agv1_agv0"
+        args="0 0 0 0 0 0 agv_0/map agv_1/odom 100" />
     <!-- <include file="$(find multi_agv_sim)/launch/multi_maps_merge.launch"></include> -->
 </launch>
