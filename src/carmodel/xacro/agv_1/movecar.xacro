@@ -25,7 +25,7 @@
     <gazebo>
         <plugin name="mecanum_controller" filename="libgazebo_ros_planar_move.so">
             <commandTopic>cmd_vel</commandTopic>
-            <odometryTopic>${ns}/odom</odometryTopic>
+            <odometryTopic>odom</odometryTopic>
             <odometryFrame>${ns}/odom</odometryFrame>
             <leftFrontJoint>${ns}/wheel_left_front_link</leftFrontJoint>
             <rightFrontJoint>${ns}/wheel_right_front_link</rightFrontJoint>

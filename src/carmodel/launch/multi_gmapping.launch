@@ -1,5 +1,5 @@
 <launch>
-  <arg name="ns" default="agv_0"/>
+  <arg name="ns" default=""/>
     <param name="use_sim_time" value="true"/>
         <node pkg="gmapping" type="slam_gmapping" name="slam_gmapping" output="screen">
           <param name="base_frame" value="$(arg ns)/base_link"/><!--底盘坐标系-->

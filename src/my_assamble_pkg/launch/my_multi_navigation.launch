@@ -1,0 +1,31 @@
+<launch>
+    <arg name="ns" default="" />
+    <node pkg="move_base" type="move_base" respawn="false" name="move_base" output="screen"
+        clear_params="true">
+        <!-- <remap from="scan" to="$(arg ns)/scan"></remap>
+        <remap from="base_link" to="$(arg ns)/base_link"></remap>
+        <remap from="odom" to="$(arg ns)/odom"></remap>
+        <remap from="map" to="$(arg ns)/map"></remap> -->
+        <rosparam file="$(find my_assamble_pkg)/param/costmap_common_params.yaml" command="load"
+            ns="global_costmap" />
+        <rosparam file="$(find my_assamble_pkg)/param/costmap_common_params.yaml" command="load"
+            ns="local_costmap" />
+        <rosparam file="$(find my_assamble_pkg)/param/local_costmap_params.yaml" command="load" />
+        <rosparam file="$(find my_assamble_pkg)/param/global_costmap_params.yaml" command="load" />
+        <rosparam file="$(find my_assamble_pkg)/param/base_local_planner_params.yaml" command="load" />
+        <rosparam file="$(find my_assamble_pkg)/param/move_base_params.yaml" command="load" />
+        <!-- 修改前缀，需要这样修改-->
+        <param name="global_costmap/scan/sensor_frame" value="$(arg ns)/scan" />
+        <param name="global_costmap/obstacle_layer/scan/sensor_frame"
+            value="$(arg ns)/rader_link" />
+        <param name="global_costmap/global_frame" value="$(arg ns)/map" />
+        <param name="global_costmap/robot_base_frame"
+            value="$(arg ns)/base_link" />
+        <param name="local_costmap/scan/sensor_frame" value="$(arg ns)/scan" />
+        <param name="local_costmap/obstacle_layer/scan/sensor_frame"
+            value="$(arg ns)/rader_link" />
+        <param name="local_costmap/global_frame" value="$(arg ns)/odom" />
+        <param name="local_costmap/robot_base_frame"
+            value="$(arg ns)/base_link" />
+    </node>
+</launch>
