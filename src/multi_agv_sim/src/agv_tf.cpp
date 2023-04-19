@@ -3,22 +3,22 @@
 #include "geometry_msgs/TransformStamped.h"
 #include "tf2/LinearMath/Quaternion.h"
 #include <nav_msgs/Odometry.h>
-//负责将agv1转化到agv0的地图下
-void agv_pos_tf(const nav_msgs::Odometry::ConstPtr &msg)
+//负责生成AGV1旁边的组合AGV2位置
+void agv_pos_tf()
 {
     static tf2_ros::TransformBroadcaster broadcaster;
     geometry_msgs::TransformStamped tfs;
     // tfs.header.seq=100;
-    tfs.header.frame_id = "agv_0/map";
+    tfs.header.frame_id = "agv_0/base_link";
     tfs.header.stamp = ros::Time::now();
 
-    tfs.child_frame_id = "agv_1/odom";
-    tfs.transform.translation.x = msg->pose.pose.position.x;
-    tfs.transform.translation.y = msg->pose.pose.position.y;
-    tfs.transform.translation.z = msg->pose.pose.position.x;
+    tfs.child_frame_id = "agv_1/ass_pos";
+    tfs.transform.translation.x = 0;
+    tfs.transform.translation.y = -0.3;
+    tfs.transform.translation.z = 0;
 
     tf2::Quaternion qtn;
-    qtn.setRPY(msg->pose.pose.orientation.x, msg->pose.pose.orientation.y, msg->pose.pose.orientation.z);
+    qtn.setRPY(0,0,0);
     tfs.transform.rotation.x = qtn.getX();
     tfs.transform.rotation.y = qtn.getY();
     tfs.transform.rotation.z = qtn.getZ();
@@ -36,12 +36,11 @@ int main(int argc, char *argv[])
 
     ros::Rate rate(10);
     float y = 0.25;
-    ros::Subscriber sub = n.subscribe<nav_msgs::Odometry>("agv_1/odom",1000, agv_pos_tf);
-    // while (ros::ok())
-    // {
-
-    //     rate.sleep();
-    // }
+    while (ros::ok())
+    {
+        agv_pos_tf();
+        rate.sleep();
+    }
     ros::spin();
     return 0;
 }

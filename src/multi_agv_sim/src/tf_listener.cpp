@@ -21,21 +21,21 @@ int main(int argc, char *argv[])
         try
         {
             geometry_msgs::TransformStamped tf2;
-            tf2 = buffer.lookupTransform("agv_1/base_link", "agv_0/base_link", ros::Time(0));
+            tf2 = buffer.lookupTransform("agv_1/base_link", "agv_1/ass_pos", ros::Time(0));
             geometry_msgs::Twist vel_msg;
             double angular = 4*atan2(tf2.transform.translation.y, tf2.transform.translation.x);
-            double vel = 0.5*sqrt(pow(tf2.transform.translation.x, 2) + pow(tf2.transform.translation.y, 2));
-            if (vel < 1)
+            double vel = 1*sqrt(pow(tf2.transform.translation.x, 2) + pow(tf2.transform.translation.y, 2));
+            if (vel < 0.01)
             {
                 vel = 0;
                 angular = 0;
             }
 
-            ROS_WARN_STREAM(tf2.transform);
-            ROS_WARN_STREAM(angular << " " << vel);
+            // ROS_WARN_STREAM(tf2.transform);
+            // ROS_WARN_STREAM(angular << " " << vel);
             vel_msg.angular.z = angular;
             vel_msg.linear.x = vel;
-            agv_1_vel.publish(vel_msg);
+            // agv_1_vel.publish(vel_msg);
         }
         catch (const std::exception &r)
         {
