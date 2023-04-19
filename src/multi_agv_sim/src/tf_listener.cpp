@@ -8,7 +8,9 @@
 #include <actionlib/client/simple_action_client.h>
 #include "actionlib/client/simple_goal_state.h"
 using namespace actionlib;
+void subscribe(){
 
+}
 // 0是未抵达状态，1是已经抵达，-1是无法抵达
 int assamble_status = 0;
 int main(int argc, char *argv[])
@@ -18,6 +20,7 @@ int main(int argc, char *argv[])
     ROS_ERROR("agv2控制节点已启动");
     ros::NodeHandle n;
     ros::Publisher agv_1_vel = n.advertise<geometry_msgs::Twist>("agv_1/cmd_vel", 10);
+    //ros::Subscriber agv_0_vel=n.subscribe<geometry_msgs::Twist>("agv_10cmd_vel", 10,subscribe);
 
     SimpleActionClient<move_base_msgs::MoveBaseAction> MoveBaseClient("agv_1/move_base", true);
     move_base_msgs::MoveBaseGoal goal;
@@ -26,7 +29,7 @@ int main(int argc, char *argv[])
     tf2_ros::Buffer buffer;
     tf2_ros::TransformListener listener(buffer);
     ros::Rate rate(5);
-    ros::Duration(10).sleep();
+    ros::Duration(1).sleep();
     ROS_ERROR("agv2控制节点已正式启动");
     goal.target_pose.header.frame_id = "map";
     try
@@ -147,14 +150,21 @@ int main(int argc, char *argv[])
             {
                 geometry_msgs::TransformStamped agv2_asspos = buffer.lookupTransform("agv_1/base_link", "agv_1/ass_pos", ros::Time(0));
                 geometry_msgs::Twist vel_msg;
-                double angular = 4 * atan2(agv2_asspos.transform.translation.y, agv2_asspos.transform.translation.x);
+                double angular = agv2_asspos.transform.rotation.z;
+
                 double vel = 1 * sqrt(pow(agv2_asspos.transform.translation.x, 2) + pow(agv2_asspos.transform.translation.y, 2));
-                vel_msg.angular.z = angular;
                 vel_msg.linear.x = vel;
-                if (vel < 0.01)
+                if (vel < 0.04 && angular < 0.01)
                 {
-                    vel = 0;
-                    angular = 0;
+                    vel_msg.linear.x = 0;
+                    vel_msg.linear.y = 0;
+                    vel_msg.angular.z = 0;
+                }
+                else
+                {
+                    vel_msg.linear.x = 5 * agv2_asspos.transform.translation.x;
+                    vel_msg.linear.y = 5 * agv2_asspos.transform.translation.y;
+                    vel_msg.angular.z = 8 * agv2_asspos.transform.rotation.z;
                 }
                 agv_1_vel.publish(vel_msg);
             }
