@@ -31,7 +31,7 @@ int main(int argc, char *argv[])
 {
     setlocale(LC_ALL, "");
     ros::init(argc, argv, "agv_tf");
-    ROS_ERROR("坐标变换已启动");
+    ROS_ERROR("坐标变换广播已启动");
     ros::NodeHandle n;
 
     ros::Rate rate(10);

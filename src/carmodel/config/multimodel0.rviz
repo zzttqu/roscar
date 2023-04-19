@@ -6,9 +6,9 @@ Panels:
       Expanded:
         - /Global Options1
         - /Status1
-        - /RobotModel1
         - /LaserScan1/Autocompute Value Bounds1
-        - /TF1
+        - /Map1
+        - /Odometry1/Shape1
       Splitter Ratio: 0.5
     Tree Height: 520
   - Class: rviz/Selection
@@ -128,7 +128,7 @@ Visualization Manager:
       Use Fixed Frame: true
       Use rainbow: true
       Value: true
-    - Alpha: 0.699999988079071
+    - Alpha: 1
       Class: rviz/Map
       Color Scheme: map
       Draw Behind: false
@@ -156,7 +156,7 @@ Visualization Manager:
           Value: true
         Value: false
       Enabled: true
-      Keep: 100
+      Keep: 10
       Name: Odometry
       Position Tolerance: 0.10000000149011612
       Queue Size: 10
@@ -165,10 +165,10 @@ Visualization Manager:
         Axes Length: 1
         Axes Radius: 0.10000000149011612
         Color: 255; 25; 0
-        Head Length: 0.30000001192092896
-        Head Radius: 0.10000000149011612
-        Shaft Length: 1
-        Shaft Radius: 0.05000000074505806
+        Head Length: 0.20000000298023224
+        Head Radius: 0.05000000074505806
+        Shaft Length: 0.75
+        Shaft Radius: 0.02500000037252903
         Value: Arrow
       Topic: /agv_0/odom
       Unreliable: false
@@ -178,7 +178,7 @@ Visualization Manager:
       Color Scheme: costmap
       Draw Behind: false
       Enabled: true
-      Name: Map
+      Name: costMap
       Topic: /agv_0/move_base/global_costmap/costmap
       Unreliable: false
       Use Timestamp: false
@@ -219,6 +219,8 @@ Visualization Manager:
       Value: false
     - Class: rviz/TF
       Enabled: true
+      Filter (blacklist): ""
+      Filter (whitelist): ""
       Frame Timeout: 15
       Frames:
         All Enabled: true
@@ -238,7 +240,11 @@ Visualization Manager:
           Value: true
         agv_0/wheel_right_front_link:
           Value: true
+        agv_1/ass_pos:
+          Value: true
         agv_1/base_link:
+          Value: true
+        agv_1/map:
           Value: true
         agv_1/odom:
           Value: true
@@ -252,6 +258,8 @@ Visualization Manager:
           Value: true
         agv_1/wheel_right_front_link:
           Value: true
+        map:
+          Value: true
       Marker Alpha: 1
       Marker Scale: 1
       Name: TF
@@ -259,38 +267,42 @@ Visualization Manager:
       Show Axes: true
       Show Names: true
       Tree:
-        agv_0/map:
-          agv_0/odom:
-            agv_0/base_link:
-              agv_0/radar_link:
-                {}
-              agv_0/wheel_left_back_link:
-                {}
-              agv_0/wheel_left_front_link:
-                {}
-              agv_0/wheel_right_back_link:
-                {}
-              agv_0/wheel_right_front_link:
-                {}
-          agv_1/odom:
-            agv_1/base_link:
-              agv_1/radar_link:
-                {}
-              agv_1/wheel_left_back_link:
-                {}
-              agv_1/wheel_left_front_link:
-                {}
-              agv_1/wheel_right_back_link:
-                {}
-              agv_1/wheel_right_front_link:
-                {}
+        map:
+          agv_0/map:
+            agv_0/odom:
+              agv_0/base_link:
+                agv_0/radar_link:
+                  {}
+                agv_0/wheel_left_back_link:
+                  {}
+                agv_0/wheel_left_front_link:
+                  {}
+                agv_0/wheel_right_back_link:
+                  {}
+                agv_0/wheel_right_front_link:
+                  {}
+                agv_1/ass_pos:
+                  {}
+          agv_1/map:
+            agv_1/odom:
+              agv_1/base_link:
+                agv_1/radar_link:
+                  {}
+                agv_1/wheel_left_back_link:
+                  {}
+                agv_1/wheel_left_front_link:
+                  {}
+                agv_1/wheel_right_back_link:
+                  {}
+                agv_1/wheel_right_front_link:
+                  {}
       Update Interval: 0
       Value: true
   Enabled: true
   Global Options:
     Background Color: 48; 48; 48
     Default Light: true
-    Fixed Frame: agv_0/map
+    Fixed Frame: map
     Frame Rate: 30
   Name: root
   Tools:
@@ -314,7 +326,7 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 11.681560516357422
+      Distance: 15.393806457519531
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
@@ -322,17 +334,17 @@ Visualization Manager:
         Value: false
       Field of View: 0.7853981852531433
       Focal Point:
-        X: -0.16195181012153625
-        Y: -0.06233828142285347
-        Z: 0.44441676139831543
+        X: 0.03698979318141937
+        Y: -0.14583909511566162
+        Z: -0.035800717771053314
       Focal Shape Fixed Size: true
       Focal Shape Size: 0.05000000074505806
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 0.9153979420661926
+      Pitch: 1.1653977632522583
       Target Frame: <Fixed Frame>
-      Yaw: 0.040401656180620193
+      Yaw: 0.0004024505615234375
     Saved: ~
 Window Geometry:
   Displays:

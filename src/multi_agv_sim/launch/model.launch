@@ -57,9 +57,9 @@
         <node name="spawn_urdf" pkg="gazebo_ros" type="spawn_model"
             args="-urdf -model $(arg second_agv) -x $(arg second_agv_x_pos) -y $(arg second_agv_y_pos) -z $(arg second_agv_z_pos) -Y $(arg second_agv_yaw) -param robot_description" />
         <!-- 切换gmapping建图 -->
-        <!-- <include file="$(find carmodel)/launch/multi_gmapping.launch">
+        <include file="$(find carmodel)/launch/multi_gmapping.launch">
             <arg name="ns" value="$(arg second_agv)" />
-        </include> -->
+        </include>
         <node name="rviz" pkg="rviz" type="rviz"
             args="-d $(find carmodel)/config/multimodel1.rviz" />
         <!-- movebase路径规划 -->
@@ -70,9 +70,9 @@
     </group>
     <node pkg="multi_agv_sim" type="tf_listener" name="tf_listener" output="screen" />
     <node pkg="multi_agv_sim" type="agv_tf" name="agv_tf" output="screen" />
-    <node pkg="tf" type="static_transform_publisher"
+    <!-- <node pkg="tf" type="static_transform_publisher"
         name="agv1_agv0"
-        args="0 0 0 0 0 0 agv_0/map agv_1/odom 100" />
+        args="0 0 0 0 0 0 agv_0/map agv_1/odom 100" /> -->
     <!-- 多地图合并-->
-    <!-- <include file="$(find multi_agv_sim)/launch/multi_maps_merge.launch"></include> -->
+    <include file="$(find multi_agv_sim)/launch/multi_maps_merge.launch"></include>
 </launch>
