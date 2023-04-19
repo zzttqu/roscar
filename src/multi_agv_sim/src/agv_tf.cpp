@@ -14,7 +14,7 @@ void agv_pos_tf()
 
     tfs.child_frame_id = "agv_1/ass_pos";
     tfs.transform.translation.x = 0;
-    tfs.transform.translation.y = -0.3;
+    tfs.transform.translation.y = -1;
     tfs.transform.translation.z = 0;
 
     tf2::Quaternion qtn;
@@ -31,7 +31,7 @@ int main(int argc, char *argv[])
 {
     setlocale(LC_ALL, "");
     ros::init(argc, argv, "agv_tf");
-    ROS_ERROR("坐标变换广播已启动");
+    ROS_ERROR("组合坐标变换广播已启动");
     ros::NodeHandle n;
 
     ros::Rate rate(10);
