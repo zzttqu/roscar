@@ -68,8 +68,22 @@
             <arg name="map_ns" value="$(arg second_agv)" />
         </include>
     </group>
-    <node pkg="multi_agv_sim" type="tf_listener" name="tf_listener" output="screen" />
-    <node pkg="multi_agv_sim" type="agv_tf" name="agv_tf" output="screen" />
+    <!-- <node pkg="multi_agv_sim" type="tf_listener" name="tf_listener" output="screen">
+        <param name="num" value="2"></param>
+    </node> -->
+    <node pkg="multi_agv_sim" type="ass_agv_pos" name="ass_agv_pos" output="screen">
+        <param name="num" value="2"></param>
+    </node>
+    <node pkg="multi_agv_sim" type="cal_center" name="cal_center" output="screen">
+        <param name="num" value="2"></param>
+    </node>
+    <include file="$(find multi_agv_sim)/launch/center_nav.launch">
+
+    </include>
+    <!-- <include file="$(find my_assamble_pkg)/launch/my_multi_navigation.launch">
+        <arg name="ns" value="agv_ass" />
+        <arg name="map_ns" value="agv_0" />
+    </include> -->
     <!-- <node pkg="tf" type="static_transform_publisher"
         name="agv1_agv0"
         args="0 0 0 0 0 0 agv_0/map agv_1/odom 100" /> -->

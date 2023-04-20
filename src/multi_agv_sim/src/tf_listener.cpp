@@ -8,8 +8,10 @@
 #include <actionlib/client/simple_action_client.h>
 #include "actionlib/client/simple_goal_state.h"
 using namespace actionlib;
-void subscribe(){
-
+void subscribe(const geometry_msgs::Twist::ConstPtr& agv0_vel)
+{
+    agv0_vel->angular.x;
+    agv0_vel->angular.z;
 }
 // 0是未抵达状态，1是已经抵达，-1是无法抵达
 int assamble_status = 0;
@@ -19,8 +21,8 @@ int main(int argc, char *argv[])
     ros::init(argc, argv, "tf_listener");
     ROS_ERROR("agv2控制节点已启动");
     ros::NodeHandle n;
-    ros::Publisher agv_1_vel = n.advertise<geometry_msgs::Twist>("agv_1/cmd_vel", 10);
-    //ros::Subscriber agv_0_vel=n.subscribe<geometry_msgs::Twist>("agv_10cmd_vel", 10,subscribe);
+    ros::Publisher agv_1_vel = n.advertise<geometry_msgs::Twist>("agv_1/cmd_vel", 1000);
+    // ros::Subscriber agv_0_vel = n.subscribe<geometry_msgs::Twist>("agv_0/cmd_vel", 1000, subscribe);
 
     SimpleActionClient<move_base_msgs::MoveBaseAction> MoveBaseClient("agv_1/move_base", true);
     move_base_msgs::MoveBaseGoal goal;

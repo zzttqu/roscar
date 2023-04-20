@@ -1,6 +1,4 @@
 <launch>
-    <arg name="ns" default="" />
-    <arg name="map_ns" default="" />
     <node pkg="move_base" type="move_base" respawn="false" name="move_base" output="screen"
         clear_params="true">
         <!-- <remap from="scan" to="$(arg ns)/scan"></remap>
@@ -16,13 +14,17 @@
         <rosparam file="$(find my_assamble_pkg)/param/base_local_planner_params.yaml" command="load" />
         <rosparam file="$(find my_assamble_pkg)/param/move_base_params.yaml" command="load" />
         <!-- 修改前缀，需要这样修改-->
-        <param name="global_costmap/scan/sensor_frame" value="$(arg ns)/scan" />
-        <param name="global_costmap/obstacle_layer/scan/sensor_frame" value="$(arg ns)/rader_link" />
-        <param name="global_costmap/global_frame" value="$(arg map_ns)/map" />
-        <param name="global_costmap/robot_base_frame"  value="$(arg ns)/base_link" />
-        <param name="local_costmap/scan/sensor_frame" value="$(arg ns)/scan" />
-        <param name="local_costmap/obstacle_layer/scan/sensor_frame" value="$(arg ns)/rader_link" />
-        <param name="local_costmap/global_frame" value="$(arg ns)/odom" />
-        <param name="local_costmap/robot_base_frame" value="$(arg ns)/base_link" />
+        <param name="global_costmap/scan/sensor_frame" value="agv_0/scan" />
+        <param name="global_costmap/obstacle_layer/scan/sensor_frame" value="agv_0/rader_link" />
+        <param name="global_costmap/global_frame" value="agv_0/map" />
+        <param name="global_costmap/robot_base_frame"  value="agv_ass/base_link" />
+        <param name="local_costmap/scan/sensor_frame" value="agv_0/scan" />
+        <param name="local_costmap/obstacle_layer/scan/sensor_frame" value="agv_0/rader_link" />
+        <param name="local_costmap/global_frame" value="agv_0/odom" />
+        <param name="local_costmap/robot_base_frame" value="agv_ass/base_link" />
+        <!-- 将接收的话题从内部的simple转化为外部传入的center_goal -->
+        <remap from="move_base_simple/goal" to="move_base_simple/center_goal"/>
+        <!-- 将内部发布的cmd_vel转化为agv_ass/cmd_vel发出-->
+        <remap from="cmd_vel" to="agv_ass/cmd_vel"/>
     </node>
 </launch>
