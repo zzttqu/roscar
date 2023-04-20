@@ -158,7 +158,6 @@ int main(int argc, char *argv[])
                 geometry_msgs::TransformStamped agv2_asspos = buffer.lookupTransform(agv_pos.str(), ass_pos.str(), ros::Time(0));
                 geometry_msgs::Twist vel_msg;
                 double angular = agv2_asspos.transform.rotation.z;
-                ROS_WARN_STREAM(agv2_asspos);
                 double vel = 1 * sqrt(pow(agv2_asspos.transform.translation.x, 2) + pow(agv2_asspos.transform.translation.y, 2));
                 vel_msg.linear.x = vel;
                 if (vel < 0.04 && angular < 0.01)
