@@ -43,6 +43,9 @@
             <arg name="ns" value="$(arg first_agv)" />
             <arg name="map_ns" value="$(arg first_agv)" />
         </include>
+        <node pkg="multi_agv_sim" type="tf_listener" name="tf_listener" output="screen">
+            <param name="num" value="2"></param>
+        </node>
     </group>
     <group ns="$(arg second_agv)">
         <node pkg="robot_state_publisher" type="robot_state_publisher" name="robot_state_publisher"
@@ -67,10 +70,11 @@
             <arg name="ns" value="$(arg second_agv)" />
             <arg name="map_ns" value="$(arg second_agv)" />
         </include>
+        <node pkg="multi_agv_sim" type="tf_listener" name="tf_listener" output="screen">
+            <param name="num" value="2"></param>
+        </node>
     </group>
-    <!-- <node pkg="multi_agv_sim" type="tf_listener" name="tf_listener" output="screen">
-        <param name="num" value="2"></param>
-    </node> -->
+
     <node pkg="multi_agv_sim" type="ass_agv_pos" name="ass_agv_pos" output="screen">
         <param name="num" value="2"></param>
     </node>
@@ -78,7 +82,6 @@
         <param name="num" value="2"></param>
     </node>
     <include file="$(find multi_agv_sim)/launch/center_nav.launch">
-
     </include>
     <!-- <include file="$(find my_assamble_pkg)/launch/my_multi_navigation.launch">
         <arg name="ns" value="agv_ass" />

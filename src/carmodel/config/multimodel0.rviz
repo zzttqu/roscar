@@ -10,6 +10,8 @@ Panels:
         - /Odometry1/Shape1
         - /TF1
         - /TF1/Tree1
+        - /TF1/Tree1/map1
+        - /TF1/Tree1/map1/agv_0/map1
       Splitter Ratio: 0.5
     Tree Height: 520
   - Class: rviz/Selection
@@ -257,12 +259,6 @@ Visualization Manager:
           Value: true
         agv_1/wheel_right_front_link:
           Value: true
-        agv_ass/base_link:
-          Value: true
-        agv_ass/base_link/agv_0:
-          Value: true
-        agv_ass/base_link/agv_1:
-          Value: true
         map:
           Value: true
       Marker Alpha: 1
@@ -286,11 +282,6 @@ Visualization Manager:
                   {}
                 agv_0/wheel_right_front_link:
                   {}
-            agv_ass/base_link:
-              agv_ass/base_link/agv_0:
-                {}
-              agv_ass/base_link/agv_1:
-                {}
           agv_1/map:
             agv_1/odom:
               agv_1/base_link:

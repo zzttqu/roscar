@@ -1,10 +1,6 @@
 <launch>
     <node pkg="move_base" type="move_base" respawn="false" name="move_base" output="screen"
         clear_params="true">
-        <!-- <remap from="scan" to="$(arg ns)/scan"></remap>
-        <remap from="base_link" to="$(arg ns)/base_link"></remap>
-        <remap from="odom" to="$(arg ns)/odom"></remap>
-        <remap from="map" to="$(arg ns)/map"></remap> -->
         <rosparam file="$(find my_assamble_pkg)/param/costmap_common_params.yaml" command="load"
             ns="global_costmap" />
         <rosparam file="$(find my_assamble_pkg)/param/costmap_common_params.yaml" command="load"
