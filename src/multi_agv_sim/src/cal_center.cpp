@@ -160,7 +160,7 @@ int main(int argc, char *argv[])
             geometry_msgs::TransformStamped ass_agv_pos;
             for (size_t i = 0; i < num; i++)
             {
-                // 运动解算
+                // 运动解算有问题
                 ass_agv_pos = all_agvs_status[i].center2agv_tf;
                 // ROS_INFO_STREAM(ass_agv_pos);
                 agv_cmd_vel[i].linear.x = center_x - center_yaw * ass_agv_pos.transform.translation.y;
