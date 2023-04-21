@@ -1,0 +1,12 @@
+int32 motor1_current
+int32 motor1_voltage
+int32 motor1_temp
+int32 motor2_current
+int32 motor2_voltage
+int32 motor2_temp
+int32 motor3_current
+int32 motor3_voltage
+int32 motor3_temp
+int32 motor4_current
+int32 motor4_voltage
+int32 motor4_temp

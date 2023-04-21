@@ -8,6 +8,9 @@
 #include <move_base_msgs/MoveBaseAction.h>
 #include <actionlib/client/simple_action_client.h>
 #include "actionlib/client/simple_goal_state.h"
+#include "multi_agv_sim/agv_status.h"
+#include "multi_agv_sim/agv_motor_status.h"
+using namespace multi_agv_sim;
 using namespace actionlib;
 using namespace std;
 
@@ -20,7 +23,7 @@ void subscribe(const geometry_msgs::Twist::ConstPtr &agv0_vel)
 int assamble_status = 0;
 
 void nav_to_pos(
-    string ns,
+    int agv_id,
     SimpleActionClient<move_base_msgs::MoveBaseAction> &MoveBaseClient,
     move_base_msgs::MoveBaseGoal &goal,
     tf2_ros::Buffer &buffer, string goal_link)
@@ -36,23 +39,23 @@ void nav_to_pos(
     MoveBaseClient.waitForResult(ros::Duration(5));
     if (MoveBaseClient.getState() == SimpleClientGoalState::SUCCEEDED)
     {
-        ROS_INFO_STREAM(ns << "已到达预定位置");
+        ROS_INFO_STREAM(agv_id << "号AGV已到达预定位置");
         assamble_status = 1;
     }
     else if (SimpleClientGoalState::ACTIVE)
     {
-        ROS_INFO_STREAM(ns << "正在前往预定位置");
+        ROS_INFO_STREAM(agv_id << "号AGV正在前往预定位置");
         assamble_status = 0;
     }
     else if (SimpleClientGoalState::PENDING)
     {
         MoveBaseClient.sendGoal(goal);
-        ROS_WARN_STREAM(ns << "未收到坐标信息，已重新发送");
+        ROS_WARN_STREAM(agv_id << "号AGV未收到坐标信息,已重新发送");
     }
     else
     {
         assamble_status = -1;
-        ROS_ERROR_STREAM(ns << "无法到达预定位置");
+        ROS_ERROR_STREAM(agv_id << "号AGV无法到达预定位置");
     }
 }
 
@@ -63,13 +66,13 @@ int main(int argc, char *argv[])
     ROS_ERROR("agv控制节点已启动");
     ros::NodeHandle n;
     // 发布当前AGV状态
-    std_msgs::Int32 topic_msg;
+    agv_status agv_status;
     move_base_msgs::MoveBaseGoal goal;
 
-    ros::Publisher move_status = n.advertise<std_msgs::Int32>("move_status", 10);
-    std::string ns = n.getNamespace();
-    // 去除第一位的/防止出错
-    ns = ns.erase(0, 1);
+    ros::Publisher move_status = n.advertise<std_msgs::Int32>("/agv_status", 100);
+    int agv_id = n.getNamespace().back() - '0'; // 取出agv的id
+    agv_status.header.frame_id = n.getNamespace();
+    agv_status.agv_id = agv_id;
     ros::Publisher agv_vel = n.advertise<geometry_msgs::Twist>("cmd_vel", 100);
     // ros::Subscriber agv_0_vel = n.subscribe<geometry_msgs::Twist>("agv_0/cmd_vel", 1000, subscribe);
     SimpleActionClient<move_base_msgs::MoveBaseAction> MoveBaseClient("move_base", true);
@@ -84,14 +87,14 @@ int main(int argc, char *argv[])
     geometry_msgs::TransformStamped nav_goal_tf;
 
     stringstream ass_pos;
-    ass_pos << "agv_ass/base_link/" << ns;
+    ass_pos << "agv_ass/base_link/agv_" << agv_id;
     stringstream agv_pos;
-    agv_pos << ns << "/base_link";
+    agv_pos << "agv_" << agv_id << "/base_link";
 
     int ass_pos_count = 0;
     try
     {
-        nav_to_pos(ns, MoveBaseClient, goal, buffer, ass_pos.str());
+        nav_to_pos(agv_id, MoveBaseClient, goal, buffer, ass_pos.str());
     }
     catch (const std::exception &e)
     {
@@ -99,9 +102,10 @@ int main(int argc, char *argv[])
         ros::Duration(0.5).sleep();
     }
 
-    topic_msg.data = assamble_status;
-    move_status.publish(topic_msg);
-    ROS_ERROR("准备进入循环");
+    agv_status.agv_move_status = assamble_status;
+    agv_status.header.stamp = ros::Time::now();
+    move_status.publish(agv_status);
+    // ROS_ERROR("准备进入循环");
     while (ros::ok())
     {
 
@@ -110,7 +114,7 @@ int main(int argc, char *argv[])
         {
             try
             {
-                nav_to_pos(ns, MoveBaseClient, goal, buffer, ass_pos.str());
+                nav_to_pos(agv_id, MoveBaseClient, goal, buffer, ass_pos.str());
             }
             catch (const std::exception &e)
             {
@@ -118,40 +122,43 @@ int main(int argc, char *argv[])
                 ros::Duration(0.5).sleep();
             }
 
-            topic_msg.data = assamble_status;
-            move_status.publish(topic_msg);
+            agv_status.agv_move_status = assamble_status;
+            agv_status.header.stamp = ros::Time::now();
+            move_status.publish(agv_status);
         }
         // 正在前往
-        if (assamble_status == 0)
+        else if (assamble_status == 0)
         {
             // MoveBaseClient.waitForResult(ros::Duration(10));
             if (MoveBaseClient.getState() == SimpleClientGoalState::SUCCEEDED)
             {
-                ROS_INFO_STREAM(ns << "已到达预定位置");
+                ROS_INFO_STREAM(agv_id << "号AGV已到达预定位置");
                 assamble_status = 1;
             }
             else if (SimpleClientGoalState::ACTIVE)
             {
-                ROS_INFO_STREAM(ns << "正在前往预定位置");
+                // ROS_INFO_STREAM(agv_id << "正在前往预定位置");
                 assamble_status = 0;
             }
             else if (SimpleClientGoalState::PENDING)
             {
                 MoveBaseClient.sendGoal(goal);
-                ROS_WARN_STREAM(ns << "未收到坐标信息，已重新发送");
+                ROS_WARN_STREAM(agv_id << "号AGV未收到坐标信息，已重新发送");
             }
             else
             {
                 assamble_status = -1;
-                ROS_ERROR_STREAM(ns << "无法到达预定位置");
+                ROS_ERROR_STREAM(agv_id << "无法到达预定位置");
             }
-            topic_msg.data = assamble_status;
-            move_status.publish(topic_msg);
+            agv_status.agv_move_status = assamble_status;
+            agv_status.header.stamp = ros::Time::now();
+            move_status.publish(agv_status);
+            ROS_WARN_STREAM(agv_id << "号AGV已发送状态信息" << agv_status);
         }
 
         // 进入锁定状态
         // 迅速对齐，稳定后在判定为锁定成功
-        if (assamble_status == 1 && ass_pos_count < 3)
+        else if (assamble_status == 1 && ass_pos_count < 3)
         {
             try
             {
@@ -173,9 +180,10 @@ int main(int argc, char *argv[])
                     vel_msg.linear.y = 3 * agv2_asspos.transform.translation.y;
                     vel_msg.angular.z = 6 * agv2_asspos.transform.rotation.z;
                 }
-                agv_vel.publish(vel_msg);
-                topic_msg.data = assamble_status;
-                move_status.publish(topic_msg);
+                agv_status.agv_move_status = assamble_status;
+                agv_status.header.stamp = ros::Time::now();
+                move_status.publish(agv_status);
+                ROS_WARN_STREAM(agv_id << "号AGV已发送状态信息" << agv_status);
             }
             catch (const std::exception &e)
             {
@@ -183,20 +191,23 @@ int main(int argc, char *argv[])
                 ros::Duration(0.5).sleep();
             }
         }
-        if (assamble_status == 1 && ass_pos_count >= 3)
+        else if (assamble_status == 1 && ass_pos_count >= 3)
         {
             geometry_msgs::Twist vel_msg;
             vel_msg.linear.x = 0;
             vel_msg.linear.y = 0;
             vel_msg.angular.z = 0;
             agv_vel.publish(vel_msg);
-            //锁定成功
-            assamble_status=2;
-            topic_msg.data = assamble_status;
-            move_status.publish(topic_msg);
+            // 锁定成功
+            assamble_status = 2;
+            agv_status.agv_move_status = assamble_status;
+            agv_status.center2agv_tf=buffer.lookupTransform("agv_ass/base_link", agv_pos.str(), ros::Time(0));
+            agv_status.header.stamp = ros::Time::now();
+            move_status.publish(agv_status);
+            ROS_WARN_STREAM(agv_id << "已发送到位状态信息" << agv_status);
         }
         // 锁定后，坐标变换啥的
-        if (assamble_status == 2)
+        else if (assamble_status == 2)
         {
         }
         rate.sleep();

@@ -1,0 +1,6 @@
+std_msgs/Header header
+int32 agv_id
+agv_motor_status motor_status
+int32 agv_move_status
+int32 agv_warning
+geometry_msgs/TransformStamped center2agv_tf

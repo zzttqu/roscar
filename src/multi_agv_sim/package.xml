@@ -71,6 +71,7 @@
   <build_export_depend>actionlib</build_export_depend>
   <build_export_depend>costmap_2d</build_export_depend>
   <build_export_depend>dynamic_reconfigure</build_export_depend>
+  <build_depend>message_generation</build_depend>
   <exec_depend>geometry_msgs</exec_depend>
   <exec_depend>roscpp</exec_depend>
   <exec_depend>rospy</exec_depend>
@@ -82,6 +83,7 @@
   <exec_depend>actionlib</exec_depend>
   <exec_depend>costmap_2d</exec_depend>
   <exec_depend>dynamic_reconfigure</exec_depend>
+  <exec_depend>message_runtime</exec_depend>
 
   <!-- The export tag contains other, unspecified, tags -->
   <export>
