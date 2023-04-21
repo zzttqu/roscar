@@ -8,8 +8,8 @@
     <arg name="first_agv_z_pos" default=" 0.0" />
     <arg name="first_agv_yaw" default=" 0.0" />
 
-    <arg name="second_agv_x_pos" default=" 3.0" />
-    <arg name="second_agv_y_pos" default="-2.0" />
+    <arg name="second_agv_x_pos" default=" 2.0" />
+    <arg name="second_agv_y_pos" default="-1.0" />
     <arg name="second_agv_z_pos" default=" 0.0" />
     <arg name="second_agv_yaw" default=" 0.0" />
     <include file="$(find gazebo_ros)/launch/empty_world.launch">

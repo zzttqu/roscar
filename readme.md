@@ -28,3 +28,5 @@ crtographer按照官方的方法安装，缺依赖项需要删除。
 
     安装 navigation 包(用于定位以及路径规划):sudo apt install ros-<ROS版本>-navigation
 多地图融合	sudo apt install ros-${ROS_DISTRO}-multirobot-map-merge ros-${ROS_DISTRO}-explore-lite
+agv数量的限制在cal_center中的agv_status中
+如果没有ros::spin，那就不会执行订阅的回调，所以需要在循环中spinonce
