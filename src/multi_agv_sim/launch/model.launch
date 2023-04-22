@@ -91,6 +91,6 @@
         args="0 0 0 0 0 0 agv_0/map agv_1/odom 100" /> -->
     <!-- 多地图合并-->
     <include file="$(find multi_agv_sim)/launch/multi_maps_merge.launch"></include>
-    <node pkg="multi_agv_sim" type="clean_map" name="clean_map" output="screen">
+    <node pkg="multi_agv_sim" type="map_scan_filter" name="map_scan_filter" output="screen">
     </node>
 </launch>

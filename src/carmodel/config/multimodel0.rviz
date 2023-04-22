@@ -6,11 +6,10 @@ Panels:
       Expanded:
         - /Global Options1
         - /Status1
-        - /LaserScan1/Autocompute Value Bounds1
         - /Odometry1/Shape1
         - /TF1/Tree1
-        - /Map3
-      Splitter Ratio: 0.5
+        - /LaserScan1
+      Splitter Ratio: 0.4647058844566345
     Tree Height: 520
   - Class: rviz/Selection
     Name: Selection
@@ -71,44 +70,6 @@ Visualization Manager:
       Update Interval: 0
       Value: false
       Visual Enabled: true
-    - Alpha: 0.5
-      Autocompute Intensity Bounds: true
-      Autocompute Value Bounds:
-        Max Value: 0.30000001192092896
-        Min Value: 0.30000001192092896
-        Value: true
-      Axis: Z
-      Channel Name: intensity
-      Class: rviz/LaserScan
-      Color: 25; 255; 0
-      Color Transformer: FlatColor
-      Decay Time: 0
-      Enabled: true
-      Invert Rainbow: false
-      Max Color: 255; 255; 255
-      Min Color: 0; 0; 0
-      Name: LaserScan
-      Position Transformer: XYZ
-      Queue Size: 10
-      Selectable: true
-      Size (Pixels): 5
-      Size (m): 0.05000000074505806
-      Style: Flat Squares
-      Topic: /agv_0/scan
-      Unreliable: false
-      Use Fixed Frame: true
-      Use rainbow: true
-      Value: true
-    - Alpha: 1
-      Class: rviz/Map
-      Color Scheme: map
-      Draw Behind: false
-      Enabled: false
-      Name: Map
-      Topic: /agv_0/map
-      Unreliable: false
-      Use Timestamp: false
-      Value: false
     - Angle Tolerance: 0.10000000149011612
       Class: rviz/Odometry
       Covariance:
@@ -148,12 +109,22 @@ Visualization Manager:
       Class: rviz/Map
       Color Scheme: costmap
       Draw Behind: false
-      Enabled: false
-      Name: costMap
-      Topic: /agv_0/move_base/global_costmap/costmap
+      Enabled: true
+      Name: ass_costMap
+      Topic: /move_base/global_costmap/costmap
       Unreliable: false
       Use Timestamp: false
-      Value: false
+      Value: true
+    - Alpha: 0.699999988079071
+      Class: rviz/Map
+      Color Scheme: map
+      Draw Behind: false
+      Enabled: true
+      Name: ass_loacl_costmap
+      Topic: /move_base/local_costmap/costmap
+      Unreliable: false
+      Use Timestamp: false
+      Value: true
     - Alpha: 1
       Buffer Length: 1
       Class: rviz/Path
@@ -266,11 +237,6 @@ Visualization Manager:
       Show Axes: true
       Show Names: true
       Tree:
-        agv_ass/base_link:
-          agv_ass/base_link/agv_0:
-            {}
-          agv_ass/base_link/agv_1:
-            {}
         map:
           agv_0/map:
             agv_0/odom:
@@ -285,6 +251,11 @@ Visualization Manager:
                   {}
                 agv_0/wheel_right_front_link:
                   {}
+            agv_ass/base_link:
+              agv_ass/base_link/agv_0:
+                {}
+              agv_ass/base_link/agv_1:
+                {}
           agv_1/map:
             agv_1/odom:
               agv_1/base_link:
@@ -358,6 +329,34 @@ Visualization Manager:
       Unreliable: false
       Use Timestamp: false
       Value: true
+    - Alpha: 1
+      Autocompute Intensity Bounds: true
+      Autocompute Value Bounds:
+        Max Value: 10
+        Min Value: -10
+        Value: true
+      Axis: Z
+      Channel Name: y
+      Class: rviz/LaserScan
+      Color: 255; 255; 255
+      Color Transformer: Intensity
+      Decay Time: 0
+      Enabled: true
+      Invert Rainbow: false
+      Max Color: 255; 255; 255
+      Min Color: 0; 0; 0
+      Name: LaserScan
+      Position Transformer: XYZ
+      Queue Size: 10
+      Selectable: true
+      Size (Pixels): 3
+      Size (m): 0.10000000149011612
+      Style: Flat Squares
+      Topic: /filtered_scan
+      Unreliable: false
+      Use Fixed Frame: true
+      Use rainbow: true
+      Value: true
   Enabled: true
   Global Options:
     Background Color: 48; 48; 48
@@ -386,7 +385,7 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 12.833033561706543
+      Distance: 15.489173889160156
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
@@ -394,17 +393,17 @@ Visualization Manager:
         Value: false
       Field of View: 0.7853981852531433
       Focal Point:
-        X: 1.1133455038070679
-        Y: -0.26476550102233887
-        Z: 0.20018370449543
+        X: 0.38613998889923096
+        Y: -0.6156201958656311
+        Z: -0.04846303164958954
       Focal Shape Fixed Size: true
       Focal Shape Size: 0.05000000074505806
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 1.149796485900879
+      Pitch: 1.1397967338562012
       Target Frame: <Fixed Frame>
-      Yaw: 0.07540006190538406
+      Yaw: 6.278587341308594
     Saved: ~
 Window Geometry:
   Displays:

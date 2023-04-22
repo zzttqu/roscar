@@ -76,13 +76,7 @@ void agv_status_callback(const agv_status::ConstPtr &status, int num)
 // 接收定位数据
 void center_vel_callback(const Twist::ConstPtr &vel_msg)
 {
-    // // 求得各车相对中心坐标的位置
-    // TransformStamped map_agv_pos[num];
-    // for (size_t i = 0; i < num; i++)
-    // {
-    //     map_agv_pos[i] = buffer.lookupTransform("agv_ass/base_link", agv_link_names[i], ros::Time(0));
-    // }
-    // buffer.lookupTransform("agv_ass/base_link", "agv_ass/base_link/agv_0", ros::Time(0));
+
     // 获取中心速度，解算由别的函数干
     center_x = vel_msg.get()->linear.x;
     center_y = vel_msg.get()->linear.y;

@@ -146,7 +146,7 @@ include_directories(
 add_executable(ass_agv_pos src/ass_agv_pos.cpp)
 add_executable(tf_listener src/tf_listener.cpp)
 add_executable(cal_center src/cal_center.cpp)
-add_executable(clean_map src/clean_map.cpp)
+add_executable(map_scan_filter src/map_scan_filter.cpp)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
@@ -168,7 +168,7 @@ target_link_libraries(tf_listener
 target_link_libraries(cal_center
   ${catkin_LIBRARIES}
 )
-target_link_libraries(clean_map
+target_link_libraries(map_scan_filter
   ${catkin_LIBRARIES}
 )
 #############
