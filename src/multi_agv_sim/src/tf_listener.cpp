@@ -121,7 +121,7 @@ int main(int argc, char *argv[])
     int count = 0;
     while (ros::ok())
     {
-        count++;
+
         ros::spinOnce();
         if (core_status_flag != 1)
         {
@@ -131,6 +131,7 @@ int main(int argc, char *argv[])
         }
         else if (count < 3)
         {
+            count++;
             ROS_INFO("中央管理节点已上线");
         }
         // 未设定目标
@@ -236,7 +237,7 @@ int main(int argc, char *argv[])
         }
         catch (const std::exception &e)
         {
-            ROS_ERROR_STREAM(e.what());
+            ROS_ERROR_STREAM("未找到坐标变换"<<e.what());
         }
         this_agv_status.agv_move_status = assamble_status;
         this_agv_status.header.stamp = ros::Time::now();
