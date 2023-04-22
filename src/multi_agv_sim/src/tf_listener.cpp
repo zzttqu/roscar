@@ -201,6 +201,8 @@ int main(int argc, char *argv[])
         try
         {
             this_agv_status.center2agv_ass_tf = buffer.lookupTransform("agv_ass/base_link", ass_pos.str(), ros::Time(0));
+            // 找到实际坐标和生成坐标的误差
+            this_agv_status.error_tf = buffer.lookupTransform(ass_pos.str(), agv_pos.str(), ros::Time(0));
             auto x = this_agv_status.center2agv_ass_tf.transform.translation.x;
             auto y = this_agv_status.center2agv_ass_tf.transform.translation.y;
             this_agv_status.center_radius = sqrt(x * x + y * y);

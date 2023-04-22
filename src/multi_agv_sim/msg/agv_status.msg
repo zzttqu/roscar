@@ -5,4 +5,5 @@ int32 agv_move_status
 int32 agv_warning
 geometry_msgs/TransformStamped center2agv_tf
 geometry_msgs/TransformStamped center2agv_ass_tf
+geometry_msgs/TransformStamped error_tf
 float64 center_radius

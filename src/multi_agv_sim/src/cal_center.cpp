@@ -18,6 +18,7 @@ struct Agv_Status
     int agv_warning;
     TransformStamped center2agv_tf;
     TransformStamped center2agv_ass_tf;
+    TransformStamped error_tf;
     int agv_motor_status;
     double center_radius;
 };
@@ -34,6 +35,7 @@ void agv_status_callback(const agv_status::ConstPtr &status, int num)
     all_agvs_status[status->agv_id].agv_move_status = status->agv_move_status;
     all_agvs_status[status->agv_id].center2agv_tf = status->center2agv_tf;
     all_agvs_status[status->agv_id].center2agv_ass_tf = status->center2agv_ass_tf;
+    all_agvs_status[status->agv_id].error_tf = status->error_tf;
     all_agvs_status[status->agv_id].center_radius = status->center_radius;
     // ROS_INFO_STREAM("现在agv"<<status->agv_id<<"状态" << status->agv_move_status);
     for (size_t i = 0; i < num; i++)
@@ -163,29 +165,31 @@ int main(int argc, char *argv[])
             center_cal(agv_link_names, num, center, broadcaster, buffer);
             for (size_t i = 0; i < num; i++)
             {
-                // 运动解算有问题
-                geometry_msgs::TransformStamped center2agv_tf = all_agvs_status[i].center2agv_tf;
-                geometry_msgs::TransformStamped center2agv_ass_tf = all_agvs_status[i].center2agv_ass_tf;
+                // 就不用时间戳了。。。太长了有点难看，直接就是tf了
+                geometry_msgs::Transform center2agv_tf = all_agvs_status[i].center2agv_tf.transform;
+                geometry_msgs::Transform error_tf = all_agvs_status[i].error_tf.transform;
                 // ROS_INFO_STREAM(ass_agv_pos);
                 // 因为是从中心指向agv，所以向量要取反
                 // 实际状态下
-                double x = center2agv_tf.transform.translation.x;
-                double y = center2agv_tf.transform.translation.y;
-                double center_distence = sqrt(x * x + y * y);
-                //这个是旋转p
-                double error = all_agvs_status[i].center_radius - center_distence;
-                //还需要直线p
-                // 求出角速度
-                double w = center_yaw;
+                double real_x = center2agv_tf.translation.x;
+                double real_y = center2agv_tf.translation.y;
 
+                double center_distence = sqrt(real_x * real_x + real_y * real_y);
+                // 生成p
+                double error_yaw = tf2::getYaw(error_tf.rotation);
+                double error_x = error_tf.translation.x;
+                double error_y = error_tf.translation.y;
+
+                // 求出角速度，角度不能直接相加的哦，顺时针和逆时针不一样
+                double w = center_yaw - 1 * error_yaw;
+                // ROS_INFO_STREAM(i <<" "<< error_yaw);
                 // 理想状态假定
-                x = center2agv_ass_tf.transform.translation.x;
-                y = center2agv_ass_tf.transform.translation.y;
 
                 // 求出线速度
-                double linerx = y * w + sin(atan2(y, x)) * 0.5 * error;
-                double linery = x * w + cos(atan2(y, x)) * 0.5 * error;
-
+                // double linerx = real_y * w + sin(atan2(real_y, real_x)) * 0.5 * error_yaw;
+                // double linery = real_x * w + cos(atan2(real_y, real_x)) * 0.5 * error_yaw;
+                double linerx = real_y * w + error_x * 1;
+                double linery = real_x * w + error_y * 1;
                 // 线速度正交分解
                 agv_cmd_vel[i].linear.x = center_x - linerx;
                 agv_cmd_vel[i].linear.y = center_y - linery;
