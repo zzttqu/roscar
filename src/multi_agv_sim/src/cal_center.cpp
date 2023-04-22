@@ -30,9 +30,14 @@ int agv_ass_status, center_set_flag;
 double center_x, center_y, center_yaw;
 
 void center_init_pos_set(const PoseWithCovarianceStamped::ConstPtr &initpose,
-                         TransformStamped &center,
-                         tf2_ros::TransformBroadcaster &broadcaster)
+                         TransformStamped &center, tf2_ros::TransformBroadcaster &broadcaster)
 {
+    if (center_set_flag != 0)
+    {
+        ROS_WARN("您已经设置过了初始位置，请不要再设置");
+        return;
+    }
+    // 发布手动标记的初始化组合位置
     center_set_flag = 1;
     center.header.frame_id = "agv_0/map";
     center.child_frame_id = "agv_ass/base_link";
@@ -41,7 +46,6 @@ void center_init_pos_set(const PoseWithCovarianceStamped::ConstPtr &initpose,
     center.transform.translation.y = initpose->pose.pose.position.y;
     center.header.stamp = ros::Time::now();
     broadcaster.sendTransform(center);
-    return;
 }
 
 // 接收各个AGV状态
@@ -83,7 +87,7 @@ void center_vel_callback(const Twist::ConstPtr &vel_msg)
     center_x = vel_msg.get()->linear.x;
     center_y = vel_msg.get()->linear.y;
     center_yaw = vel_msg.get()->angular.z;
-    ROS_INFO_STREAM("x速度为" << center_x << "x速度为" << center_y << "x速度为" << center_yaw);
+    // ROS_INFO_STREAM("中心x速度为" << center_x << " y速度为" << center_y << " z速度为" << center_yaw);
 }
 
 void center_cal(string agv_link_names[],
@@ -153,7 +157,7 @@ int main(int argc, char *argv[])
     ros::Subscriber center_vel_topic = n.subscribe<Twist>("agv_ass/cmd_vel", 10, &center_vel_callback);
 
     // 订阅2Dpos初始中心位置
-    ros::Subscriber center_init_pos = n.subscribe<PoseWithCovarianceStamped>("/initialpose", 10, boost::bind(&center_init_pos_set, _1, center, broadcaster));
+    ros::Subscriber center_init_pos = n.subscribe<PoseWithCovarianceStamped>("/initialpose", 10, boost::bind(center_init_pos_set, _1, boost::ref(center), boost::ref(broadcaster)));
 
     // 发布中央控制初始化完成消息
 
@@ -161,7 +165,7 @@ int main(int argc, char *argv[])
 
     // 发布各个车的速度信息
     ros::Publisher agvs_vel_topics[num];
-    ros::Subscriber agv_status_sub = n.subscribe<agv_status>("/agv_status", 10, boost::bind(&agv_status_callback, _1, num));
+    ros::Subscriber agv_status_sub = n.subscribe<agv_status>("/agv_status", 10, boost::bind(agv_status_callback, _1, num));
     stringstream ss;
     ros::Rate rate(10);
     string agv_link_names[num];
@@ -181,10 +185,9 @@ int main(int argc, char *argv[])
         ss.str(string());
     }
 
-    // boost::bind(agv_status_callback, _1, i);
     // ROS_WARN("准备进入循环");
 
-    ros::Duration(0.5).sleep();
+    // ros::Duration(0.5).sleep();
     // 循环次数
     int count = 0;
     while (ros::ok())
@@ -200,16 +203,18 @@ int main(int argc, char *argv[])
             center_cal(agv_link_names, num, center, broadcaster, buffer);
             std_msgs::Int32 core_status;
             core_status.data = 1;
+            // 表示core节点还活着
             core_node_status.publish(core_status);
         }
-        else if (center_set_flag == 1)
+        else if (center_set_flag == 1 && count < 10)
         {
             ROS_INFO_STREAM("检测到初始化组合位置");
             std_msgs::Int32 core_status;
             core_status.data = 1;
+            // 表示core节点还活着
             core_node_status.publish(core_status);
         }
-        if (center_set_flag == 0)
+        else if (center_set_flag == 0)
         {
             rate.sleep();
             continue;
@@ -259,6 +264,7 @@ int main(int argc, char *argv[])
             // 就绪就发个消息
             std_msgs::Int32 core_status;
             core_status.data = 1;
+            // 表示core节点还活着
             core_node_status.publish(core_status);
             // 这里应该加一个允许接收目标点的flag，但是现在不需要
         }
@@ -269,6 +275,7 @@ int main(int argc, char *argv[])
             broadcaster.sendTransform(center);
             std_msgs::Int32 core_status;
             core_status.data = 1;
+            // 表示core节点还活着
             core_node_status.publish(core_status);
         }
 

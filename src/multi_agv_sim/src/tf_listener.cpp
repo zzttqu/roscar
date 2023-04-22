@@ -76,7 +76,7 @@ int main(int argc, char *argv[])
     // 发布当前AGV状态
     agv_status this_agv_status;
     move_base_msgs::MoveBaseGoal goal;
-
+    // 发布自身状态
     ros::Publisher move_status = n.advertise<agv_status>("/agv_status", 10);
     int agv_id = n.getNamespace().back() - '0'; // 取出agv的id
     this_agv_status.header.frame_id = n.getNamespace();
@@ -139,7 +139,6 @@ int main(int argc, char *argv[])
         {
             try
             {
-
                 nav_to_pos(agv_id, MoveBaseClient, goal, buffer, ass_pos.str());
             }
             catch (const std::exception &e)

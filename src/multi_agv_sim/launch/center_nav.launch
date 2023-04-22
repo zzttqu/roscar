@@ -21,8 +21,9 @@
         <remap from="move_base_simple/goal" to="move_base_simple/center_goal" />
         <!-- 将内部发布的cmd_vel转化为agv_ass/cmd_vel发出-->
         <remap from="cmd_vel" to="agv_ass/cmd_vel" />
-        <!-- 切换各个信息节点 -->
+        <!-- 切换各个信息节点到0车 -->
         <remap from="map" to="agv_0/map" />
+        <remap from="odom" to="agv_0/odom" />
         <remap from="scan" to="agv_0/scan" />
     </node>
 </launch>

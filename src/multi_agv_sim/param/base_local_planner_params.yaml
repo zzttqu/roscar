@@ -8,9 +8,9 @@ DWAPlannerROS:
   #不用rot_vel因为查看了参数服务器不对
   max_vel_theta: 3
   min_vel_theta: -3
-  acc_lim_x: 0.5
-  acc_lim_y: 0.5
-  acc_lim_th: 5
+  acc_lim_x: 1
+  acc_lim_y: 1
+  acc_lim_th: 2
   #acc_lim_trans: 1.25
 
   prune_plan: false

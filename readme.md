@@ -30,3 +30,4 @@ crtographer按照官方的方法安装，缺依赖项需要删除。
 多地图融合	sudo apt install ros-${ROS_DISTRO}-multirobot-map-merge ros-${ROS_DISTRO}-explore-lite
 agv数量的限制在cal_center中的agv_status中
 如果没有ros::spin，那就不会执行订阅的回调，所以需要在循环中spinonce
+boost传参数如果需要修改外部的要用*传地址进去，或者使用boost：：ref（）包裹起来，才算引用外部
