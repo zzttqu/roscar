@@ -37,7 +37,7 @@ int main(int argc, char *argv[])
 {
     setlocale(LC_ALL, "");
     ros::init(argc, argv, "agv_tf");
-    ROS_ERROR("组合坐标变换广播已启动");
+    ROS_INFO("组合坐标变换广播已启动");
     ros::NodeHandle n;
     int num = 2;
     n.getParam("num", num);

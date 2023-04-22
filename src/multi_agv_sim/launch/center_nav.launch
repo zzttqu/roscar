@@ -1,6 +1,5 @@
 <launch>
-    <node pkg="move_base" type="move_base" respawn="false" name="move_base" output="screen"
-        clear_params="true">
+    <node pkg="move_base" type="move_base" respawn="false" name="move_base" clear_params="true">
         <rosparam file="$(find my_assamble_pkg)/param/costmap_common_params.yaml" command="load"
             ns="global_costmap" />
         <rosparam file="$(find my_assamble_pkg)/param/costmap_common_params.yaml" command="load"
