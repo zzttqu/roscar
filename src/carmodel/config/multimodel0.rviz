@@ -9,6 +9,7 @@ Panels:
         - /LaserScan1/Autocompute Value Bounds1
         - /Odometry1/Shape1
         - /TF1/Tree1
+        - /Map3
       Splitter Ratio: 0.5
     Tree Height: 520
   - Class: rviz/Selection
@@ -102,12 +103,12 @@ Visualization Manager:
       Class: rviz/Map
       Color Scheme: map
       Draw Behind: false
-      Enabled: true
+      Enabled: false
       Name: Map
       Topic: /agv_0/map
       Unreliable: false
       Use Timestamp: false
-      Value: true
+      Value: false
     - Angle Tolerance: 0.10000000149011612
       Class: rviz/Odometry
       Covariance:
@@ -147,12 +148,12 @@ Visualization Manager:
       Class: rviz/Map
       Color Scheme: costmap
       Draw Behind: false
-      Enabled: true
+      Enabled: false
       Name: costMap
       Topic: /agv_0/move_base/global_costmap/costmap
       Unreliable: false
       Use Timestamp: false
-      Value: true
+      Value: false
     - Alpha: 1
       Buffer Length: 1
       Class: rviz/Path
@@ -265,6 +266,11 @@ Visualization Manager:
       Show Axes: true
       Show Names: true
       Tree:
+        agv_ass/base_link:
+          agv_ass/base_link/agv_0:
+            {}
+          agv_ass/base_link/agv_1:
+            {}
         map:
           agv_0/map:
             agv_0/odom:
@@ -279,11 +285,6 @@ Visualization Manager:
                   {}
                 agv_0/wheel_right_front_link:
                   {}
-            agv_ass/base_link:
-              agv_ass/base_link/agv_0:
-                {}
-              agv_ass/base_link/agv_1:
-                {}
           agv_1/map:
             agv_1/odom:
               agv_1/base_link:
@@ -347,6 +348,16 @@ Visualization Manager:
       Topic: /move_base/DWAPlannerROS/local_plan
       Unreliable: false
       Value: true
+    - Alpha: 1
+      Class: rviz/Map
+      Color Scheme: map
+      Draw Behind: false
+      Enabled: true
+      Name: Map
+      Topic: /filtered_map
+      Unreliable: false
+      Use Timestamp: false
+      Value: true
   Enabled: true
   Global Options:
     Background Color: 48; 48; 48
@@ -375,7 +386,7 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 5.412208080291748
+      Distance: 12.833033561706543
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
@@ -391,9 +402,9 @@ Visualization Manager:
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 1.079796552658081
+      Pitch: 1.149796485900879
       Target Frame: <Fixed Frame>
-      Yaw: 6.253586292266846
+      Yaw: 0.07540006190538406
     Saved: ~
 Window Geometry:
   Displays:
