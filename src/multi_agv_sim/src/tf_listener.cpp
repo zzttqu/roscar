@@ -5,6 +5,7 @@
 #include "geometry_msgs/Twist.h"
 #include <std_msgs/Int32.h>
 #include "tf2/LinearMath/Quaternion.h"
+#include "tf2/utils.h"
 #include <move_base_msgs/MoveBaseAction.h>
 #include <actionlib/client/simple_action_client.h>
 #include "actionlib/client/simple_goal_state.h"
@@ -38,7 +39,7 @@ void nav_to_pos(
     MoveBaseClient.waitForResult(ros::Duration(5));
     if (MoveBaseClient.getState() == SimpleClientGoalState::SUCCEEDED)
     {
-        ROS_INFO_STREAM(agv_id << "号AGV已到达预定位置");
+        // ROS_INFO_STREAM(agv_id << "号AGV已到达预定位置");
         assamble_status = 1;
     }
     else if (SimpleClientGoalState::ACTIVE)
@@ -153,9 +154,11 @@ int main(int argc, char *argv[])
         {
             try
             {
+                // 这里改成了固定的
                 geometry_msgs::TransformStamped agv2_asspos = buffer.lookupTransform(agv_pos.str(), ass_pos.str(), ros::Time(0));
                 geometry_msgs::Twist vel_msg;
-                double angular = agv2_asspos.transform.rotation.z;
+                // 需要把四元数转化出来
+                double angular = tf2::getYaw(agv2_asspos.transform.rotation);
                 double vel = 1 * sqrt(pow(agv2_asspos.transform.translation.x, 2) + pow(agv2_asspos.transform.translation.y, 2));
                 vel_msg.linear.x = vel;
                 if (vel < 0.04 && angular < 0.01)
@@ -167,9 +170,9 @@ int main(int argc, char *argv[])
                 }
                 else
                 {
-                    vel_msg.linear.x = 2 * agv2_asspos.transform.translation.x;
-                    vel_msg.linear.y = 2 * agv2_asspos.transform.translation.y;
-                    vel_msg.angular.z = 4 * agv2_asspos.transform.rotation.z;
+                    vel_msg.linear.x = 1 * agv2_asspos.transform.translation.x;
+                    vel_msg.linear.y = 1 * agv2_asspos.transform.translation.y;
+                    vel_msg.angular.z = 4 * tf2::getYaw(agv2_asspos.transform.rotation);
                     agv_vel.publish(vel_msg);
                 }
             }
@@ -197,6 +200,10 @@ int main(int argc, char *argv[])
         }
         try
         {
+            this_agv_status.center2agv_ass_tf = buffer.lookupTransform("agv_ass/base_link", ass_pos.str(), ros::Time(0));
+            auto x = this_agv_status.center2agv_ass_tf.transform.translation.x;
+            auto y = this_agv_status.center2agv_ass_tf.transform.translation.y;
+            this_agv_status.center_radius = sqrt(x * x + y * y);
             this_agv_status.center2agv_tf = buffer.lookupTransform("agv_ass/base_link", agv_pos.str(), ros::Time(0));
         }
         catch (const std::exception &e)

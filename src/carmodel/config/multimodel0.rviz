@@ -9,7 +9,6 @@ Panels:
         - /LaserScan1/Autocompute Value Bounds1
         - /Odometry1/Shape1
         - /TF1/Tree1
-        - /Path1
       Splitter Ratio: 0.5
     Tree Height: 520
   - Class: rviz/Selection
@@ -58,48 +57,18 @@ Visualization Manager:
     - Alpha: 1
       Class: rviz/RobotModel
       Collision Enabled: false
-      Enabled: true
+      Enabled: false
       Links:
         All Links Enabled: true
         Expand Joint Details: false
         Expand Link Details: false
         Expand Tree: false
         Link Tree Style: Links in Alphabetic Order
-        agv_0/base_link:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        agv_0/radar_link:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        agv_0/wheel_left_back_link:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        agv_0/wheel_left_front_link:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        agv_0/wheel_right_back_link:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        agv_0/wheel_right_front_link:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
       Name: RobotModel
       Robot Description: robot_description
       TF Prefix: ""
       Update Interval: 0
-      Value: true
+      Value: false
       Visual Enabled: true
     - Alpha: 0.5
       Autocompute Intensity Bounds: true
@@ -156,7 +125,7 @@ Visualization Manager:
           Scale: 1
           Value: true
         Value: false
-      Enabled: true
+      Enabled: false
       Keep: 10
       Name: Odometry
       Position Tolerance: 0.10000000149011612
@@ -173,7 +142,7 @@ Visualization Manager:
         Value: Arrow
       Topic: /agv_0/odom
       Unreliable: false
-      Value: true
+      Value: false
     - Alpha: 1
       Class: rviz/Map
       Color Scheme: costmap
@@ -206,6 +175,30 @@ Visualization Manager:
       Shaft Diameter: 0.10000000149011612
       Shaft Length: 0.10000000149011612
       Topic: /agv_0/move_base/DWAPlannerROS/global_plan
+      Unreliable: false
+      Value: true
+    - Alpha: 1
+      Buffer Length: 1
+      Class: rviz/Path
+      Color: 25; 255; 0
+      Enabled: true
+      Head Diameter: 0.30000001192092896
+      Head Length: 0.20000000298023224
+      Length: 0.30000001192092896
+      Line Style: Lines
+      Line Width: 0.029999999329447746
+      Name: agv_1/path
+      Offset:
+        X: 0
+        Y: 0
+        Z: 0
+      Pose Color: 255; 85; 255
+      Pose Style: None
+      Queue Size: 10
+      Radius: 0.029999999329447746
+      Shaft Diameter: 0.10000000149011612
+      Shaft Length: 0.10000000149011612
+      Topic: /agv_1/move_base/DWAPlannerROS/global_plan
       Unreliable: false
       Value: true
     - Alpha: 0.699999988079071
@@ -266,7 +259,7 @@ Visualization Manager:
         map:
           Value: true
       Marker Alpha: 1
-      Marker Scale: 1
+      Marker Scale: 0.5
       Name: TF
       Show Arrows: true
       Show Axes: true
@@ -333,14 +326,14 @@ Visualization Manager:
     - Alpha: 1
       Buffer Length: 1
       Class: rviz/Path
-      Color: 239; 41; 41
+      Color: 204; 0; 0
       Enabled: true
       Head Diameter: 0.30000001192092896
       Head Length: 0.20000000298023224
       Length: 0.30000001192092896
       Line Style: Lines
       Line Width: 0.029999999329447746
-      Name: Path
+      Name: ass_local_Path
       Offset:
         X: 0
         Y: 0
@@ -382,7 +375,7 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 6.262916088104248
+      Distance: 1.573948860168457
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
@@ -390,17 +383,17 @@ Visualization Manager:
         Value: false
       Field of View: 0.7853981852531433
       Focal Point:
-        X: 1.798795223236084
-        Y: -0.29339826107025146
-        Z: -0.16980907320976257
+        X: 1.1133455038070679
+        Y: -0.26476550102233887
+        Z: 0.20018370449543
       Focal Shape Fixed Size: true
       Focal Shape Size: 0.05000000074505806
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 1.2197965383529663
+      Pitch: 1.5697963237762451
       Target Frame: <Fixed Frame>
-      Yaw: 0.00040482915937900543
+      Yaw: 6.238586902618408
     Saved: ~
 Window Geometry:
   Displays:

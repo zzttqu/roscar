@@ -2,8 +2,10 @@
 #include <tf2_ros/transform_broadcaster.h>
 #include <std_msgs/Int32.h>
 #include <tf2_ros/transform_listener.h>
-#include "geometry_msgs/Twist.h"
+#include <geometry_msgs/Twist.h>
 #include "multi_agv_sim/agv_status.h"
+#include "tf2/utils.h"
+#include <math.h>
 using namespace multi_agv_sim;
 using namespace std;
 using namespace geometry_msgs;
@@ -15,7 +17,9 @@ struct Agv_Status
     int agv_move_status;
     int agv_warning;
     TransformStamped center2agv_tf;
+    TransformStamped center2agv_ass_tf;
     int agv_motor_status;
+    double center_radius;
 };
 // 只有agv_Status为2倍才是全部锁定了
 Agv_Status all_agvs_status[32];
@@ -26,9 +30,11 @@ void agv_status_callback(const agv_status::ConstPtr &status, int num)
 {
     // ROS_WARN("中央管理节点已收到状态信息");
     agv_ass_status = 0;
-    //按照agv的id给每一个属性赋值
+    // 按照agv的id给每一个属性赋值
     all_agvs_status[status->agv_id].agv_move_status = status->agv_move_status;
     all_agvs_status[status->agv_id].center2agv_tf = status->center2agv_tf;
+    all_agvs_status[status->agv_id].center2agv_ass_tf = status->center2agv_ass_tf;
+    all_agvs_status[status->agv_id].center_radius = status->center_radius;
     // ROS_INFO_STREAM("现在agv"<<status->agv_id<<"状态" << status->agv_move_status);
     for (size_t i = 0; i < num; i++)
     {
@@ -61,23 +67,25 @@ void center_vel_callback(const geometry_msgs::Twist::ConstPtr &vel_msg)
 
 void center_cal(string agv_link_names[],
                 int num,
-                geometry_msgs::TransformStamped map_agv_pos[],
                 geometry_msgs::TransformStamped &center,
                 tf2_ros::TransformBroadcaster &broadcaster,
                 tf2_ros::Buffer &buffer)
 {
-    double x, y, yaw;
+    double x, y, rz, rx, ry, rw = 0;
     try
     {
         for (size_t i = 0; i < num; i++)
         {
-            map_agv_pos[i] = buffer.lookupTransform("agv_0/map", agv_link_names[i], ros::Time(0));
-            x += map_agv_pos[i].transform.translation.x;
-            y += map_agv_pos[i].transform.translation.y;
-            yaw += map_agv_pos[i].transform.rotation.z;
+            geometry_msgs::TransformStamped map_agv_pos = buffer.lookupTransform("agv_0/map", agv_link_names[i], ros::Time(0));
+            x += map_agv_pos.transform.translation.x;
+            y += map_agv_pos.transform.translation.y;
+            rz += map_agv_pos.transform.rotation.z;
+            rw += map_agv_pos.transform.rotation.w;
+            ry += map_agv_pos.transform.rotation.y;
+            rx += map_agv_pos.transform.rotation.x;
         }
-        tf2::Quaternion qtn;
-        qtn.setRPY(0, 0, yaw / num);
+        tf2::Quaternion qtn(rx / num, ry / num, rz / num, rw / num);
+        qtn.normalize();
         center.header.frame_id = "agv_0/map";
         center.child_frame_id = "agv_ass/base_link";
         center.transform.rotation.w = qtn.getW();
@@ -90,9 +98,6 @@ void center_cal(string agv_link_names[],
         center.header.stamp = ros::Time::now();
         broadcaster.sendTransform(center);
         // ROS_WARN("中心坐标计算成功");
-        x = 0;
-        y = 0;
-        yaw = 0;
     }
     catch (const std::exception &e)
     {
@@ -110,7 +115,6 @@ int main(int argc, char *argv[])
     ros::NodeHandle n;
     int num = 2;
     n.getParam("num", num);
-    geometry_msgs::TransformStamped map_agv_pos[num];
     geometry_msgs::TransformStamped center;
     tf2_ros::TransformBroadcaster broadcaster;
     tf2_ros::Buffer buffer;
@@ -146,7 +150,7 @@ int main(int argc, char *argv[])
     // ROS_WARN("准备进入循环");
     // 计算各车中点
     ros::Duration(0.5).sleep();
-    center_cal(agv_link_names, num, map_agv_pos, center, broadcaster, buffer);
+    center_cal(agv_link_names, num, center, broadcaster, buffer);
     while (ros::ok())
     {
         // 处理订阅回调函数
@@ -156,16 +160,36 @@ int main(int argc, char *argv[])
         if (agv_ass_status == (2 * num))
         {
             // 查询各AGV相对绝对地图的位置然后计算中点
-            center_cal(agv_link_names, num, map_agv_pos, center, broadcaster, buffer);
-            geometry_msgs::TransformStamped ass_agv_pos;
+            center_cal(agv_link_names, num, center, broadcaster, buffer);
             for (size_t i = 0; i < num; i++)
             {
                 // 运动解算有问题
-                ass_agv_pos = all_agvs_status[i].center2agv_tf;
+                geometry_msgs::TransformStamped center2agv_tf = all_agvs_status[i].center2agv_tf;
+                geometry_msgs::TransformStamped center2agv_ass_tf = all_agvs_status[i].center2agv_ass_tf;
                 // ROS_INFO_STREAM(ass_agv_pos);
-                agv_cmd_vel[i].linear.x = center_x - center_yaw * ass_agv_pos.transform.translation.y;
-                agv_cmd_vel[i].linear.y = center_y - center_yaw * ass_agv_pos.transform.translation.x;
-                agv_cmd_vel[i].angular.z = center_yaw;
+                // 因为是从中心指向agv，所以向量要取反
+                // 实际状态下
+                double x = center2agv_tf.transform.translation.x;
+                double y = center2agv_tf.transform.translation.y;
+                double center_distence = sqrt(x * x + y * y);
+                //这个是旋转p
+                double error = all_agvs_status[i].center_radius - center_distence;
+                //还需要直线p
+                // 求出角速度
+                double w = center_yaw;
+
+                // 理想状态假定
+                x = center2agv_ass_tf.transform.translation.x;
+                y = center2agv_ass_tf.transform.translation.y;
+
+                // 求出线速度
+                double linerx = y * w + sin(atan2(y, x)) * 0.5 * error;
+                double linery = x * w + cos(atan2(y, x)) * 0.5 * error;
+
+                // 线速度正交分解
+                agv_cmd_vel[i].linear.x = center_x - linerx;
+                agv_cmd_vel[i].linear.y = center_y - linery;
+                agv_cmd_vel[i].angular.z = w;
             }
             // 解算完毕后发布到各个AGV上
             for (size_t i = 0; i < num; i++)
