@@ -161,7 +161,7 @@ int main(int argc, char *argv[])
     ros::Publisher agvs_vel_topics[num];
     ros::Subscriber agv_status_sub = n.subscribe<agv_status>("/agv_status", 10, boost::bind(agv_status_callback, _1, num));
     stringstream ss;
-    ros::Rate rate(10);
+    ros::Rate rate(20);
     string agv_link_names[num];
     string agv_move_names[num];
     for (size_t i = 0; i < num; i++)
@@ -199,16 +199,15 @@ int main(int argc, char *argv[])
             core_status.data = 1;
             // 表示core节点还活着
             core_node_status.publish(core_status);
+            continue;
         }
         else if (center_set_flag == 1 && count < 20)
         {
             ROS_INFO_STREAM("检测到初始化组合位置");
             std_msgs::Int32 core_status;
-            core_status.data = 1;
             // 表示core节点还活着
             core_node_status.publish(core_status);
-            center.header.stamp = ros::Time::now();
-            broadcaster.sendTransform(center);
+            center_set_flag == 2;
         }
         else if (center_set_flag == 0)
         {

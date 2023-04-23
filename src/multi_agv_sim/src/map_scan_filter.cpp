@@ -174,7 +174,7 @@ int main(int argc, char **argv)
   //
   // ros::Subscriber feedback_sub = n.subscribe<actionlib_msgs::GoalStatusArray>("/move_base/status", 1, feedback_fun);
   // ros::Subscriber goal_sub = n.subscribe<move_base_msgs::MoveBaseActionGoal>("/move_base/goal", 1, goal_fun);
-  ros::Rate rate(10);
+  ros::Rate rate(20);
   int count;
   while (ros::ok())
   {

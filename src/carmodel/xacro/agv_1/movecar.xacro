@@ -31,7 +31,7 @@
             <rightFrontJoint>${ns}/wheel_right_front_link</rightFrontJoint>
             <leftRearJoint>${ns}/wheel_left_back_link</leftRearJoint>
             <rightRearJoint>${ns}/wheel_right_back_link</rightRearJoint>
-            <odometryRate>10</odometryRate>
+            <odometryRate>20</odometryRate>
             <robotBaseFrame>${ns}/base_link</robotBaseFrame>
             <broadcastTF>1</broadcastTF>
         </plugin>
