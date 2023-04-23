@@ -23,7 +23,6 @@
     <group ns="$(arg first_agv)">
         <node pkg="robot_state_publisher" type="robot_state_publisher" name="robot_state_publisher">
             <param name="publish_frequency" type="double" value="50.0" />
-            <!-- <param name="tf_prefix" value="$(arg first_agv)" /> -->
         </node>
         <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher">
         </node>
@@ -35,8 +34,6 @@
         <include file="$(find multi_agv_sim)/launch/multi_gmapping.launch">
             <arg name="ns" value="$(arg first_agv)" />
         </include>
-        <node name="rviz" pkg="rviz" type="rviz"
-            args="-d $(find carmodel)/config/multimodel0.rviz" />
         <!-- movebase路径规划 -->
         <include file="$(find multi_agv_sim)/launch/my_multi_navigation.launch">
             <arg name="ns" value="$(arg first_agv)" />
@@ -50,7 +47,6 @@
     <group ns="$(arg second_agv)">
         <node pkg="robot_state_publisher" type="robot_state_publisher" name="robot_state_publisher">
             <param name="publish_frequency" type="double" value="50.0" />
-            <!-- <param name="tf_prefix" value="$(arg second_agv)" /> -->
         </node>
         <param name="robot_description"
             command="$(find xacro)/xacro --inorder $(find carmodel)/xacro/$(arg second_agv)/carassmble.xacro ns:=$(arg second_agv)" />
@@ -80,17 +76,20 @@
     <node pkg="multi_agv_sim" type="cal_center" name="cal_center" output="screen">
         <param name="num" value="2"></param>
     </node>
-    <include file="$(find multi_agv_sim)/launch/center_nav.launch">
-    </include>
-    <!-- <include file="$(find my_assamble_pkg)/launch/my_multi_navigation.launch">
-        <arg name="ns" value="agv_ass" />
-        <arg name="map_ns" value="agv_0" />
-    </include> -->
-    <!-- <node pkg="tf" type="static_transform_publisher"
-        name="agv1_agv0"
-        args="0 0 0 0 0 0 agv_0/map agv_1/odom 100" /> -->
+
     <!-- 多地图合并-->
     <include file="$(find multi_agv_sim)/launch/multi_maps_merge.launch"></include>
-    <node pkg="multi_agv_sim" type="map_scan_filter" name="map_scan_filter" output="screen">
-    </node>
+    <!-- 发布滤波地图的tf -->
+    <node pkg="tf2_ros" type="static_transform_publisher"
+        name="world_to_ass_agv_map_tf_broadcaster"
+        args="0 0 0 0 0 0 /agv_0/map /agv_ass/map" />
+    <group ns="agv_ass">
+        <node pkg="multi_agv_sim" type="map_scan_filter" name="map_scan_filter" output="screen">
+        </node>
+        <include file="$(find multi_agv_sim)/launch/center_nav.launch"></include>
+    </group>
+
+
+    <node name="rviz" pkg="rviz" type="rviz"
+        args="-d $(find carmodel)/config/multimodel0.rviz" />
 </launch>

@@ -2,7 +2,7 @@
  
     <!-- 传动实现:用于连接控制器与关节 -->
     <xacro:macro name="joint_trans" params="joint_name">
-        Transmission is important to link the joints and the controller
+        <!-- Transmission is important to link the joints and the controller -->
         <transmission name="${joint_name}_trans">
             <type>transmission_interface/SimpleTransmission</type>
             <joint name="${joint_name}">

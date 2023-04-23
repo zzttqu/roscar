@@ -21,15 +21,15 @@
         <param name="robot_namespace" value="agv" />
         <param name="merged_map_topic" value="map" />
         <param name="world_frame" value="map" />
-        <param name="known_init_poses" value="false" />
+        <param name="known_init_poses" value="true" />
         <param name="merging_rate" value="0.5" />
         <param name="discovery_rate" value="0.05" />
         <param name="estimation_rate" value="0.1" />
         <param name="estimation_confidence" value="1.0" />
     </node>
-    <node pkg="tf" type="static_transform_publisher" name="world_to_$(arg first_agv)_tf_broadcaster"
-        args="0 0 0 0 0 0 /map /$(arg first_agv)/map 100" />
-    <node pkg="tf" type="static_transform_publisher"
+    <node pkg="tf2_ros" type="static_transform_publisher" name="world_to_$(arg first_agv)_tf_broadcaster"
+        args="0 0 0 0 0 0 /map /$(arg first_agv)/map" />
+    <node pkg="tf2_ros" type="static_transform_publisher"
         name="world_to_$(arg second_agv)_tf_broadcaster"
-        args="0 0 0 0 0 0 /map /$(arg second_agv)/map 100" />
+        args="0 0 0 0 0 0 /map /$(arg second_agv)/map" />
 </launch>

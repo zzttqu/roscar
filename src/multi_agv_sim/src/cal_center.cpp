@@ -81,7 +81,7 @@ void center_vel_callback(const Twist::ConstPtr &vel_msg)
     center_x = vel_msg.get()->linear.x;
     center_y = vel_msg.get()->linear.y;
     center_yaw = vel_msg.get()->angular.z;
-    // ROS_INFO_STREAM("中心x速度为" << center_x << " y速度为" << center_y << " z速度为" << center_yaw);
+    ROS_INFO_STREAM("中心x速度为" << center_x << " y速度为" << center_y << " z速度为" << center_yaw);
 }
 
 void center_cal(string agv_link_names[],
@@ -148,7 +148,7 @@ int main(int argc, char *argv[])
     tf2_ros::TransformListener listener(buffer);
     Twist agv_cmd_vel[num];
     // 订阅中心导航节点
-    ros::Subscriber center_vel_topic = n.subscribe<Twist>("agv_ass/cmd_vel", 10, &center_vel_callback);
+    ros::Subscriber center_vel_topic = n.subscribe<Twist>("agv_ass/cmd_vel", 1, center_vel_callback);
 
     // 订阅2Dpos初始中心位置
     ros::Subscriber center_init_pos = n.subscribe<PoseWithCovarianceStamped>("/initialpose", 10, boost::bind(center_init_pos_set, _1, boost::ref(center), boost::ref(broadcaster)));
@@ -240,8 +240,6 @@ int main(int argc, char *argv[])
                 // 理想状态假定
 
                 // 求出线速度
-                // double linerx = real_y * w + sin(atan2(real_y, real_x)) * 0.5 * error_yaw;
-                // double linery = real_x * w + cos(atan2(real_y, real_x)) * 0.5 * error_yaw;
                 double linerx = real_y * w + error_x * 1;
                 double linery = real_x * w + error_y * 1;
                 // 线速度正交分解

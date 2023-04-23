@@ -7,7 +7,11 @@ Panels:
         - /Global Options1
         - /Status1
         - /Odometry1/Shape1
+        - /ass_loacl_costmap1
         - /TF1/Tree1
+        - /ass_Path1
+        - /ass_local_Path1
+        - /filtered_map1/Status1
         - /LaserScan1
       Splitter Ratio: 0.4647058844566345
     Tree Height: 520
@@ -57,18 +61,94 @@ Visualization Manager:
     - Alpha: 1
       Class: rviz/RobotModel
       Collision Enabled: false
-      Enabled: false
+      Enabled: true
       Links:
         All Links Enabled: true
         Expand Joint Details: false
         Expand Link Details: false
         Expand Tree: false
         Link Tree Style: Links in Alphabetic Order
+        agv_1/base_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        agv_1/radar_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        agv_1/wheel_left_back_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        agv_1/wheel_left_front_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        agv_1/wheel_right_back_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        agv_1/wheel_right_front_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
       Name: RobotModel
-      Robot Description: robot_description
+      Robot Description: /agv_1/robot_description
       TF Prefix: ""
       Update Interval: 0
-      Value: false
+      Value: true
+      Visual Enabled: true
+    - Alpha: 1
+      Class: rviz/RobotModel
+      Collision Enabled: false
+      Enabled: true
+      Links:
+        All Links Enabled: true
+        Expand Joint Details: false
+        Expand Link Details: false
+        Expand Tree: false
+        Link Tree Style: Links in Alphabetic Order
+        agv_0/base_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        agv_0/radar_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        agv_0/wheel_left_back_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        agv_0/wheel_left_front_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        agv_0/wheel_right_back_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        agv_0/wheel_right_front_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+      Name: RobotModel
+      Robot Description: /agv_0/robot_description
+      TF Prefix: ""
+      Update Interval: 0
+      Value: true
       Visual Enabled: true
     - Angle Tolerance: 0.10000000149011612
       Class: rviz/Odometry
@@ -111,7 +191,7 @@ Visualization Manager:
       Draw Behind: false
       Enabled: true
       Name: ass_costMap
-      Topic: /move_base/global_costmap/costmap
+      Topic: /agv_ass/move_base/global_costmap/costmap
       Unreliable: false
       Use Timestamp: false
       Value: true
@@ -121,10 +201,20 @@ Visualization Manager:
       Draw Behind: false
       Enabled: true
       Name: ass_loacl_costmap
-      Topic: /move_base/local_costmap/costmap
+      Topic: /agv_ass/move_base/local_costmap/costmap
       Unreliable: false
       Use Timestamp: false
       Value: true
+    - Alpha: 0.699999988079071
+      Class: rviz/Map
+      Color Scheme: map
+      Draw Behind: false
+      Enabled: false
+      Name: agv_0_map
+      Topic: /agv_0/map
+      Unreliable: false
+      Use Timestamp: false
+      Value: false
     - Alpha: 1
       Buffer Length: 1
       Class: rviz/Path
@@ -228,6 +318,8 @@ Visualization Manager:
           Value: true
         agv_ass/base_link/agv_1:
           Value: true
+        agv_ass/map:
+          Value: true
         map:
           Value: true
       Marker Alpha: 1
@@ -256,6 +348,8 @@ Visualization Manager:
                 {}
               agv_ass/base_link/agv_1:
                 {}
+            agv_ass/map:
+              {}
           agv_1/map:
             agv_1/odom:
               agv_1/base_link:
@@ -292,7 +386,7 @@ Visualization Manager:
       Radius: 0.029999999329447746
       Shaft Diameter: 0.10000000149011612
       Shaft Length: 0.10000000149011612
-      Topic: /move_base/DWAPlannerROS/global_plan
+      Topic: /agv_ass/move_base/DWAPlannerROS/global_plan
       Unreliable: false
       Value: true
     - Alpha: 1
@@ -316,7 +410,7 @@ Visualization Manager:
       Radius: 0.029999999329447746
       Shaft Diameter: 0.10000000149011612
       Shaft Length: 0.10000000149011612
-      Topic: /move_base/DWAPlannerROS/local_plan
+      Topic: /agv_ass/move_base/DWAPlannerROS/local_plan
       Unreliable: false
       Value: true
     - Alpha: 1
@@ -324,8 +418,8 @@ Visualization Manager:
       Color Scheme: map
       Draw Behind: false
       Enabled: true
-      Name: Map
-      Topic: /filtered_map
+      Name: filtered_map
+      Topic: /agv_ass/map
       Unreliable: false
       Use Timestamp: false
       Value: true
@@ -338,8 +432,8 @@ Visualization Manager:
       Axis: Z
       Channel Name: y
       Class: rviz/LaserScan
-      Color: 255; 255; 255
-      Color Transformer: Intensity
+      Color: 52; 101; 164
+      Color Transformer: FlatColor
       Decay Time: 0
       Enabled: true
       Invert Rainbow: false
@@ -352,7 +446,7 @@ Visualization Manager:
       Size (Pixels): 3
       Size (m): 0.10000000149011612
       Style: Flat Squares
-      Topic: /filtered_scan
+      Topic: /agv_ass/scan
       Unreliable: false
       Use Fixed Frame: true
       Use rainbow: true
@@ -385,7 +479,7 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 15.489173889160156
+      Distance: 6.053843975067139
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
@@ -393,17 +487,17 @@ Visualization Manager:
         Value: false
       Field of View: 0.7853981852531433
       Focal Point:
-        X: 0.38613998889923096
-        Y: -0.6156201958656311
-        Z: -0.04846303164958954
+        X: 0.19437801837921143
+        Y: 0.044077806174755096
+        Z: -0.2380519062280655
       Focal Shape Fixed Size: true
       Focal Shape Size: 0.05000000074505806
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 1.1397967338562012
+      Pitch: 0.8897969126701355
       Target Frame: <Fixed Frame>
-      Yaw: 6.278587341308594
+      Yaw: 0.6304023265838623
     Saved: ~
 Window Geometry:
   Displays:
