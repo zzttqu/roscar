@@ -6,27 +6,25 @@
 #include <costmap_2d/costmap_2d.h>
 #include <costmap_2d/costmap_2d_ros.h>
 #include <sensor_msgs/LaserScan.h>
+#include <std_msgs/Int32.h>
 #include "tf2/utils.h"
 nav_msgs::OccupancyGrid filtered_map;
 sensor_msgs::LaserScan filtered_scan;
-int info_flag[2];
+int core_status_flag;
 void scanCallback(const sensor_msgs::LaserScan::ConstPtr &scan_msg)
 {
   // 复制原始数据
   filtered_scan = *scan_msg;
-  if (filtered_scan.angle_increment > 0.0001)
-  {
-    info_flag[1] = 1;
-  }
 }
 void mapCallback(const nav_msgs::OccupancyGrid::ConstPtr &map)
 {
   // 当地图更新后
   filtered_map = *map;
-  if (filtered_map.info.height > 0.00001)
-  {
-    info_flag[0] = 1;
-  }
+}
+
+void core_status(const std_msgs::Int32::ConstPtr &core)
+{
+  core_status_flag = core->data;
 }
 // 矩形
 auto setCostToZero(nav_msgs::OccupancyGrid &map, double x1, double y1, double x2, double y2)
@@ -105,17 +103,17 @@ sensor_msgs::LaserScan setScanToNaN(sensor_msgs::LaserScan &filtered_scan, float
   {
     an += 360.0;
   }
-  if (0 < an && an < 10)
+  if (0 < an && an < 5)
   {
-    an = 10;
+    an = 5;
   }
-  if (349 < an)
+  if (354 < an)
   {
-    an = 349;
+    an = 354;
   }
-  int start_index = ceil(an - 10);
+  int start_index = ceil(an - 5);
 
-  int end_index = floor(an + 10);
+  int end_index = floor(an + 5);
   // 数据总共就360个。。。
   // ROS_INFO_STREAM(start_index << " " << end_index << " " << filtered_scan.ranges.size());
 
@@ -148,18 +146,21 @@ int main(int argc, char **argv)
   // 订阅地图话题
   ros::Subscriber sub_scan = n.subscribe<sensor_msgs::LaserScan>("/agv_0/scan", 1, scanCallback);
   ros::Subscriber sub_map = n.subscribe<nav_msgs::OccupancyGrid>("/agv_0/map", 1, mapCallback);
-
+  // 订阅中央管理节点
+  ros::Subscriber agv_status_sub = n.subscribe<std_msgs::Int32>("/core_status", 10, core_status);
   ros::Rate rate(10);
-  ros::Duration(0.5).sleep();
+  ros::Duration(1).sleep();
+  int count;
   while (ros::ok())
   {
-    int inflag = 0;
     ros::spinOnce();
-    for (const auto &flag : info_flag)
+    if (core_status_flag != 1)
     {
-      inflag += flag;
+      ROS_WARN("地图滤波节点未检测中央节点上线");
+      rate.sleep();
+      continue;
     }
-    if (inflag == 2)
+    if (core_status_flag == 1)
     {
       // 发布修改后的地图话题
       try

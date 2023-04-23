@@ -21,7 +21,7 @@
         <remap from="move_base_simple/goal" to="move_base_simple/center_goal" />
         <!-- 将内部发布的cmd_vel转化为agv_ass/cmd_vel发出-->
         <remap from="cmd_vel" to="agv_ass/cmd_vel" />
-        <!-- 切换各个信息节点到0车 -->
+        <!-- 切换各个信息节点到0号agv，切换滤波话题 -->
         <remap from="map" to="/filtered_map" />
         <remap from="odom" to="agv_0/odom" />
         <remap from="scan" to="/filtered_scan" />

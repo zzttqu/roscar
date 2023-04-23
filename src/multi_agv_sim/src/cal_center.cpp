@@ -137,7 +137,7 @@ int main(int argc, char *argv[])
 {
     setlocale(LC_ALL, "");
     ros::init(argc, argv, "cal_center");
-    ROS_WARN("agv中心计算节点已启动");
+    ROS_INFO("agv中心计算节点已启动");
     ros::NodeHandle n;
     int num = 2;
     n.getParam("num", num);

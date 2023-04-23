@@ -71,7 +71,7 @@ int main(int argc, char *argv[])
 {
     setlocale(LC_ALL, "");
     ros::init(argc, argv, "tf_listener");
-    ROS_ERROR("agv控制节点已启动");
+    ROS_INFO("agv控制节点已启动");
     ros::NodeHandle n;
     // 发布当前AGV状态
     agv_status this_agv_status;
@@ -90,9 +90,8 @@ int main(int argc, char *argv[])
     tf2_ros::TransformBroadcaster broadcaster;
     tf2_ros::Buffer buffer;
     tf2_ros::TransformListener listener(buffer);
-    ros::Rate rate(5);
-    ros::Duration(1).sleep();
-    ROS_INFO("agv控制节点已正式启动");
+    ros::Rate rate(10);
+
     goal.target_pose.header.frame_id = "agv_0/map";
     geometry_msgs::TransformStamped nav_goal_tf;
 
@@ -116,23 +115,23 @@ int main(int argc, char *argv[])
     // this_agv_status.header.stamp = ros::Time::now();
     // move_status.publish(this_agv_status);
     // ROS_ERROR("准备进入循环");
-
+    ros::Duration(1).sleep();
+    ROS_INFO("agv控制节点已正式启动");
     int ass_pos_count = 0;
     int count = 0;
     while (ros::ok())
     {
-
         ros::spinOnce();
         if (core_status_flag != 1)
         {
-            ROS_WARN("中央管理节点离线中");
+            ROS_WARN("agv%d控制节点未检测中央节点上线", agv_id);
             rate.sleep();
             continue;
         }
-        else if (count < 3)
+        else if (core_status_flag == 1 && count < 2)
         {
             count++;
-            ROS_INFO("中央管理节点已上线");
+            ROS_INFO("agv%d控制节点已连接中央节点", agv_id);
         }
         // 未设定目标
         if (assamble_status == -1)
@@ -236,7 +235,7 @@ int main(int argc, char *argv[])
         }
         catch (const std::exception &e)
         {
-            ROS_ERROR_STREAM("未找到坐标变换"<<e.what());
+            ROS_ERROR_STREAM("未找到坐标变换" << e.what());
         }
         this_agv_status.agv_move_status = assamble_status;
         this_agv_status.header.stamp = ros::Time::now();
