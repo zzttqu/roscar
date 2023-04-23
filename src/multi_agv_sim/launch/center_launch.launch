@@ -1,0 +1,7 @@
+<launch>
+
+    <group ns="agv_ass">
+        <include file="$(find multi_agv_sim)/launch/center_nav.launch"></include>
+    </group>
+
+</launch>

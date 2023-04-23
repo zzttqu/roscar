@@ -8,11 +8,8 @@ Panels:
         - /Status1
         - /Odometry1/Shape1
         - /ass_loacl_costmap1
+        - /filtered_map1
         - /TF1/Tree1
-        - /ass_Path1
-        - /ass_local_Path1
-        - /filtered_map1/Status1
-        - /LaserScan1
       Splitter Ratio: 0.4647058844566345
     Tree Height: 520
   - Class: rviz/Selection
@@ -197,11 +194,21 @@ Visualization Manager:
       Value: true
     - Alpha: 0.699999988079071
       Class: rviz/Map
-      Color Scheme: map
+      Color Scheme: costmap
       Draw Behind: false
       Enabled: true
       Name: ass_loacl_costmap
       Topic: /agv_ass/move_base/local_costmap/costmap
+      Unreliable: false
+      Use Timestamp: false
+      Value: true
+    - Alpha: 1
+      Class: rviz/Map
+      Color Scheme: map
+      Draw Behind: false
+      Enabled: true
+      Name: filtered_map
+      Topic: /agv_ass/map
       Unreliable: false
       Use Timestamp: false
       Value: true
@@ -412,16 +419,6 @@ Visualization Manager:
       Shaft Length: 0.10000000149011612
       Topic: /agv_ass/move_base/DWAPlannerROS/local_plan
       Unreliable: false
-      Value: true
-    - Alpha: 1
-      Class: rviz/Map
-      Color Scheme: map
-      Draw Behind: false
-      Enabled: true
-      Name: filtered_map
-      Topic: /agv_ass/map
-      Unreliable: false
-      Use Timestamp: false
       Value: true
     - Alpha: 1
       Autocompute Intensity Bounds: true

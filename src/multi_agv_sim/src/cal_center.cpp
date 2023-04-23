@@ -189,7 +189,7 @@ int main(int argc, char *argv[])
         // 处理订阅回调函数
         count++;
         ros::spinOnce();
-        if (center_set_flag == 0 && count >= 10)
+        if (center_set_flag == 0 && count >= 20)
         {
             center_set_flag = 2;
             ROS_INFO_STREAM("未检测到初始化组合位置，将自动计算组合位置");
@@ -200,13 +200,15 @@ int main(int argc, char *argv[])
             // 表示core节点还活着
             core_node_status.publish(core_status);
         }
-        else if (center_set_flag == 1 && count < 10)
+        else if (center_set_flag == 1 && count < 20)
         {
             ROS_INFO_STREAM("检测到初始化组合位置");
             std_msgs::Int32 core_status;
             core_status.data = 1;
             // 表示core节点还活着
             core_node_status.publish(core_status);
+            center.header.stamp = ros::Time::now();
+            broadcaster.sendTransform(center);
         }
         else if (center_set_flag == 0)
         {

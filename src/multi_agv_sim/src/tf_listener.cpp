@@ -124,7 +124,7 @@ int main(int argc, char *argv[])
         ros::spinOnce();
         if (core_status_flag != 1)
         {
-            ROS_WARN("agv%d控制节点未检测中央节点上线", agv_id);
+            ROS_WARN("agv%d控制节点未检测中央节点就绪", agv_id);
             rate.sleep();
             continue;
         }

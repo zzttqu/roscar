@@ -98,7 +98,8 @@ auto setCostToZero(nav_msgs::OccupancyGrid &map, double center_x, double center_
         int index = i + j * map.info.width;
         if (index >= 0 && index < map.data.size())
         {
-          // map.data[index] = map.data[index];
+          // 调试完忘了改回去了。。。。
+          map.data[index] = 0;
           // ROS_INFO_STREAM_THROTTLE(1, "滤波地图" << map.data[index] << "数据位置" << index);
         }
       }
@@ -174,14 +175,13 @@ int main(int argc, char **argv)
   // ros::Subscriber feedback_sub = n.subscribe<actionlib_msgs::GoalStatusArray>("/move_base/status", 1, feedback_fun);
   // ros::Subscriber goal_sub = n.subscribe<move_base_msgs::MoveBaseActionGoal>("/move_base/goal", 1, goal_fun);
   ros::Rate rate(10);
-  ros::Duration(1).sleep();
   int count;
   while (ros::ok())
   {
     ros::spinOnce();
     if (core_status_flag != 1)
     {
-      ROS_WARN("地图滤波节点未检测中央节点上线");
+      ROS_WARN("地图滤波节点未检测中央节点就绪");
       rate.sleep();
       continue;
     }

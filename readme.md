@@ -32,4 +32,5 @@ agv数量的限制在cal_center中的agv_status中
 如果没有ros::spin，那就不会执行订阅的回调，所以需要在循环中spinonce
 boost传参数如果需要修改外部的要用*传地址进去，或者使用boost：：ref（）包裹起来，才算引用外部
 
-dwaPlannerROS在初始化的时候会加载node中的odom_topic
+dwaPlannerROS在初始化的时候会加载node中的odom_topic参数，然后去订阅这个odom，可以使用绝对话题，~~这个话题无法被get，我也不知道为啥，~~不过确实有用
+static_layer中也有一个map_topic话题，默认是"map"

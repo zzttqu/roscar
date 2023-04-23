@@ -83,13 +83,9 @@
     <node pkg="tf2_ros" type="static_transform_publisher"
         name="world_to_ass_agv_map_tf_broadcaster"
         args="0 0 0 0 0 0 /agv_0/map /agv_ass/map" />
-    <group ns="agv_ass">
-        <node pkg="multi_agv_sim" type="map_scan_filter" name="map_scan_filter" output="screen">
-        </node>
-        <include file="$(find multi_agv_sim)/launch/center_nav.launch"></include>
-    </group>
-
-
+    <node ns="agv_ass" pkg="multi_agv_sim" type="map_scan_filter" name="map_scan_filter"
+        output="screen">
+    </node>
     <node name="rviz" pkg="rviz" type="rviz"
         args="-d $(find carmodel)/config/multimodel0.rviz" />
 </launch>
