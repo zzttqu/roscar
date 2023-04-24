@@ -12,8 +12,8 @@ DWAPlannerROS:
   acc_lim_y: 1
   acc_lim_th: 2
   #acc_lim_trans: 1.25
-
-  prune_plan: false
+  #修建路径
+  # prune_plan: false
 
   xy_goal_tolerance: 0.25
   yaw_goal_tolerance: 0.1
@@ -36,6 +36,7 @@ DWAPlannerROS:
 
 
   use_dwa: true
+  #加载默认值
   # restore_defaults: true
   holonomic_robot: true
 
