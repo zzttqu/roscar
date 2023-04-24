@@ -7,7 +7,6 @@ Panels:
         - /Global Options1
         - /Status1
         - /Odometry1/Shape1
-        - /ass_loacl_costmap1
         - /filtered_map1
         - /TF1/Tree1
       Splitter Ratio: 0.4647058844566345
@@ -464,7 +463,7 @@ Visualization Manager:
     - Class: rviz/Measure
     - Class: rviz/SetInitialPose
       Theta std deviation: 0.2617993950843811
-      Topic: /initialpose
+      Topic: /centerPose
       X std deviation: 0.5
       Y std deviation: 0.5
     - Class: rviz/SetGoal

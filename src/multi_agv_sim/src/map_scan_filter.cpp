@@ -36,8 +36,7 @@ void mapCallback(const nav_msgs::OccupancyGrid::ConstPtr &map)
 {
   // 当地图更新后
   filtered_map = *map;
-  // ROS_INFO_STREAM_THROTTLE(1, "agv0" << map->header << " \r\n"
-  //                                    << map->info);
+
 }
 
 void core_status(const std_msgs::Int32::ConstPtr &core)
@@ -106,7 +105,8 @@ auto setCostToZero(nav_msgs::OccupancyGrid &map, double center_x, double center_
     }
   }
   map.header.stamp = ros::Time::now();
-  // ROS_INFO_STREAM_THROTTLE(1, "滤波地图" << map.header << map.info);
+  map.header.frame_id="agv_ass/map";
+  // ROS_INFO_STREAM_THROTTLE(1, "滤波地图" << map.header);
   return map;
 }
 

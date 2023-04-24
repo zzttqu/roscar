@@ -151,7 +151,7 @@ int main(int argc, char *argv[])
     ros::Subscriber center_vel_topic = n.subscribe<Twist>("agv_ass/cmd_vel", 1, center_vel_callback);
 
     // 订阅2Dpos初始中心位置
-    ros::Subscriber center_init_pos = n.subscribe<PoseWithCovarianceStamped>("/initialpose", 10, boost::bind(center_init_pos_set, _1, boost::ref(center), boost::ref(broadcaster)));
+    ros::Subscriber center_init_pos = n.subscribe<PoseWithCovarianceStamped>("/centerPose", 1, boost::bind(center_init_pos_set, _1, boost::ref(center), boost::ref(broadcaster)));
 
     // 发布中央控制初始化完成消息
 
@@ -207,7 +207,7 @@ int main(int argc, char *argv[])
             std_msgs::Int32 core_status;
             // 表示core节点还活着
             core_node_status.publish(core_status);
-            center_set_flag == 2;
+            center_set_flag = 2;
         }
         else if (center_set_flag == 0)
         {

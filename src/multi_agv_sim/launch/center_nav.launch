@@ -31,7 +31,7 @@
         <!-- 一定要注意话题和fram的区别，话题需要加前缀，fram写实际的就可以了（这个是tf -->
         <param name="global_costmap/scan/sensor_frame" value="agv_ass/scan" />
         <!-- 设置静态地图层插件提供者的话题节点 -->
-        <!-- <param name="global_costmap/static_layer/map_topic" value="map" /> -->
+        <param name="global_costmap/static_layer/map_topic" value="/agv_ass/map" />
         <!-- 设置雷达障碍物层插件订阅的scan节点因为在命名空间下，所以使用斜刚，但是也可以不用，直接写scan -->
         <!-- <param name="global_costmap/obstacle_layer/scan" value="scan" /> -->
         <!-- 设置雷达障碍物层插件link -->
