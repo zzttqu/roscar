@@ -10,14 +10,16 @@ obstacle_layer:
   observation_sources: scan
   #对传感器的坐标系和数据进行配置。这个也会用于代价地图添加和清除障碍物。例如，你可以用激光雷达传感器用于在代价地图添加障碍物，再添加kinect用于导航和清除障碍物。
   scan: {
-    sensor_frame: rader_link, 
-    data_type: LaserScan, 
-    topic: scan, 
-    marking: true, 
-    clearing: true}
+      sensor_frame: agv_0/rader_link,
+      data_type: LaserScan,
+      #这个地方是要考虑命名空间的也就是scan在命名空间中自带一个ass_agv
+      topic: scan,
+      marking: true,
+      clearing: true,
+    }
 
 inflation_layer:
-  enabled: true  
+  enabled: true
   #代价比例系数，越大则代价值越小
   cost_scaling_factor: 5.0
   #膨胀半径，扩展在碰撞区域以外的代价区域，使得机器人规划路径避开障碍物

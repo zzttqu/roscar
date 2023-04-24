@@ -38,11 +38,13 @@
         <param name="global_costmap/obstacle_layer/scan/sensor_frame" value="agv_0/rader_link" />
         <param name="global_costmap/global_frame" value="agv_ass/map" />
         <param name="global_costmap/robot_base_frame" value="agv_ass/base_link" />
-        <param name="local_costmap/scan/sensor_frame" value="agv_ass/scan" />
+        <!-- 这个参数是没用的，所有的都看障碍物层插件的 -->
+        <!-- <param name="local_costmap/scan/sensor_frame" value="agv_ass/scan" /> -->
         <!-- 设置雷达障碍物层插件订阅的scan节点因为在命名空间下，所以使用斜刚，但是也可以不用，直接写scan -->
         <!-- <param name="local_costmap/obstacle_layer/scan" value="scan" /> -->
         <!-- 设置雷达障碍物层插件link -->
         <param name="local_costmap/obstacle_layer/scan/sensor_frame" value="agv_0/rader_link" />
+        <!-- <param name="local_costmap/obstacle_layer/scan/topic" value="agv_0/rader_link" /> -->
         <param name="local_costmap/global_frame" value="agv_0/odom" />
         <param name="local_costmap/robot_base_frame" value="agv_ass/base_link" />
     </node>
