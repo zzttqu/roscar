@@ -7,8 +7,6 @@ Panels:
         - /Global Options1
         - /Status1
         - /Odometry1/Shape1
-        - /Path1
-        - /Path2
       Splitter Ratio: 0.5
     Tree Height: 549
   - Class: rviz/Selection
@@ -57,48 +55,18 @@ Visualization Manager:
     - Alpha: 1
       Class: rviz/RobotModel
       Collision Enabled: false
-      Enabled: true
+      Enabled: false
       Links:
         All Links Enabled: true
         Expand Joint Details: false
         Expand Link Details: false
         Expand Tree: false
         Link Tree Style: Links in Alphabetic Order
-        base_link:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        radar_link:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        wheel_left_back_link:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        wheel_left_front_link:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        wheel_right_back_link:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        wheel_right_front_link:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
       Name: RobotModel
       Robot Description: robot_description
       TF Prefix: ""
       Update Interval: 0
-      Value: true
+      Value: false
       Visual Enabled: true
     - Angle Tolerance: 0.10000000149011612
       Class: rviz/Odometry
@@ -138,8 +106,8 @@ Visualization Manager:
     - Alpha: 1
       Autocompute Intensity Bounds: true
       Autocompute Value Bounds:
-        Max Value: 3.937819004058838
-        Min Value: -3.8358266353607178
+        Max Value: 3.3987033367156982
+        Min Value: -1.1921825408935547
         Value: true
       Axis: Y
       Channel Name: x
@@ -165,14 +133,14 @@ Visualization Manager:
       Value: true
     - Class: rviz/TF
       Enabled: true
+      Filter (blacklist): ""
+      Filter (whitelist): ""
       Frame Timeout: 15
       Frames:
         All Enabled: true
         base_link:
           Value: true
         map:
-          Value: true
-        multi_center:
           Value: true
         odom:
           Value: true
@@ -196,8 +164,6 @@ Visualization Manager:
         map:
           odom:
             base_link:
-              multi_center:
-                {}
               radar_link:
                 {}
               wheel_left_back_link:
@@ -246,7 +212,7 @@ Visualization Manager:
       Draw Behind: false
       Enabled: true
       Name: Map
-      Topic: /move_base/local_costmap/costmap
+      Topic: /map
       Unreliable: false
       Use Timestamp: false
       Value: true
@@ -271,7 +237,7 @@ Visualization Manager:
       Radius: 0.029999999329447746
       Shaft Diameter: 0.10000000149011612
       Shaft Length: 0.10000000149011612
-      Topic: /move_base/DWAPlannerROS/global_plan
+      Topic: /move_base/DWAPlannerROS/local_plan
       Unreliable: false
       Value: true
     - Alpha: 1
@@ -326,7 +292,7 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 9.060223579406738
+      Distance: 2.03971791267395
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
@@ -334,17 +300,17 @@ Visualization Manager:
         Value: false
       Field of View: 0.7853981852531433
       Focal Point:
-        X: -0.3500558137893677
-        Y: 0.015630878508090973
-        Z: 0.49165481328964233
+        X: -0.3352593183517456
+        Y: 0.022313576191663742
+        Z: 0.5018708109855652
       Focal Shape Fixed Size: true
       Focal Shape Size: 0.05000000074505806
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 1.2497962713241577
+      Pitch: 1.0347957611083984
       Target Frame: <Fixed Frame>
-      Yaw: 0.010396921075880527
+      Yaw: 4.6285719871521
     Saved: ~
 Window Geometry:
   Displays:
@@ -363,4 +329,4 @@ Window Geometry:
     collapsed: false
   Width: 1202
   X: 350
-  Y: 108
+  Y: 27

@@ -350,7 +350,7 @@ void STM32_Serial::Publish_Odom()
     odom.twist.twist.linear.y = agv_encoder_vel.Y;    // Y方向速度
     odom.twist.twist.angular.z = agv_encoder_vel.Yaw; // 绕Z轴角速度
     pub_odom.publish(odom);                           // Pub odometer topic //发布里程计话题
-    ros::spinOnce();
+    // ros::spinOnce();
 }
 // 接收导航传入的速度数据
 void STM32_Serial::Subsribe_cmd_vel()

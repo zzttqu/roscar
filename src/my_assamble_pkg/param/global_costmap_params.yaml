@@ -6,7 +6,7 @@ global_costmap:
   publish_frequency: 1.0 #代价地图的发布频率
   transform_tolerance: 1 #等待坐标变换发布信息的超时时间
 
-  static_map: true # 是否使用一个地图或者地图服务器来初始化全局代价地图，如果不使用静态地图，这个参数为false.
+  #static_map: true # 是否使用一个地图或者地图服务器来初始化全局代价地图，如果不使用静态地图，这个参数为false.
 
   plugins:
     - {name: static_layer,    type: "costmap_2d::StaticLayer"}
