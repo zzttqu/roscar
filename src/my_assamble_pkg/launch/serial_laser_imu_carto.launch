@@ -1,24 +1,28 @@
 <launch>
   <!-- 雷达发布节点-->
-  <include file="$(find rplidar_ros)/launch/my_rplidar.launch" >
-    <arg name="port" value="ttyUSB1"/>
+  <include file="$(find rplidar_ros)/launch/my_rplidar.launch">
+    <arg name="port" value="ttyUSB1" />
   </include>
   <!-- imu发布节点-->
-  <include file="$(find wit_ros_imu)/launch/my_imu.launch">
-    <arg name="port" value="ttyUSB2"/>
-  </include>
+  <!-- <include file="$(find wit_ros_imu)/launch/my_imu.launch">
+    <arg name="port" value="ttyUSB2" />
+  </include> -->
   <!-- 串口通讯节点-->
   <include file="$(find serial_demo)/launch/my_serial.launch">
-    <arg name="port" value="ttyUSB0"/>
+    <arg name="port" value="ttyUSB0" />
   </include>
-  <!-- carto建图节点-->
+  <!-- carto定位节点-->
   <!-- <include file="$(find cartographer_ros)/launch/my_carto_local.launch">
     <arg name="load_state_filename" value="/home/zty/Downloads/maps/mymap.pbstream"></arg>
   </include> -->
-  <include file="$(find cartographer_ros)/launch/my_carto.launch">
-   
+  <!-- cartoslam -->
+  <!-- <include file="$(find cartographer_ros)/launch/my_carto.launch"/> -->
+  <!-- gmappingslam节点 -->
+  <include file="$(find my_assamble_pkg)/launch/my_gmapping.launch">
+    <!-- <arg name="ns" value="$(arg second_agv)" /> -->
   </include>
   <include file="$(find my_assamble_pkg)/launch/my_navigation.launch"></include>
-  <include file="$(find my_assamble_pkg)/launch/rviz.launch"/>
-  <!-- <node name="map_server" pkg="map_server" type="map_server" args="$(find my_assamble_pkg)/maps/mymap.pgm"/> -->
+  <include file="$(find my_assamble_pkg)/launch/rviz.launch" />
+  <!-- <node name="map_server" pkg="map_server" type="map_server" args="$(find
+  my_assamble_pkg)/maps/mymap.pgm"/> -->
 </launch>
