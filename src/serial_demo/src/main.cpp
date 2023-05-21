@@ -15,16 +15,17 @@ int main(int argc, char *argv[])
     //获取stm32串口参数
     string port = n_private.param<std::string>("serial_port", "ttyUSB0");
     int baudrate = n_private.param<int>("serial_baudrate", 115200);
-    if (stm32_Serial.Serial_Init(port, baudrate) == -1)
-    {
-        return -1;
-    }
+    // if (stm32_Serial.Serial_Init(port, baudrate) == -1)
+    // {
+    //     return -1;
+    // }
     while (ros::ok())
     {
         if (stm32_Serial.Get_Data())
         {
             stm32_Serial.Publish_Odom();
         }
+        stm32_Serial.Publish_Odom();
         ros::spinOnce();
         rate.sleep();
     }
