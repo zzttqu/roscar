@@ -1,8 +1,8 @@
 <launch>
   <!-- 雷达发布节点-->
-  <!-- <include file="$(find rplidar_ros)/launch/my_rplidar.launch">
-    <arg name="port" value="ttyUSB0" />
-  </include> -->
+  <include file="$(find rplidar_ros)/launch/my_rplidar.launch">
+    <arg name="port" value="ttyUSB1" />
+  </include>
   <!-- imu发布节点-->
   <!-- <include file="$(find wit_ros_imu)/launch/my_imu.launch">
     <arg name="port" value="ttyUSB2" />
