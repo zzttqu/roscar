@@ -1,15 +1,15 @@
 <launch>
   <!-- 雷达发布节点-->
-  <include file="$(find rplidar_ros)/launch/my_rplidar.launch">
+  <!-- <include file="$(find rplidar_ros)/launch/my_rplidar.launch">
     <arg name="port" value="ttyUSB0" />
-  </include>
+  </include> -->
   <!-- imu发布节点-->
   <!-- <include file="$(find wit_ros_imu)/launch/my_imu.launch">
     <arg name="port" value="ttyUSB2" />
   </include> -->
   <!-- 串口通讯节点-->
   <include file="$(find serial_demo)/launch/my_serial.launch">
-    <arg name="port" value="ttyUSB1" />
+    <arg name="port" value="ttyUSB0" />
   </include>
   <!-- gmappingslam节点 -->
   <include file="$(find my_assamble_pkg)/launch/my_gmapping.launch">

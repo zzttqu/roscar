@@ -48,7 +48,7 @@ class STM32_Serial
 private:
     unsigned char Recieve_Buffer[32];
     // 发送实际上是12个字节
-    unsigned char Send_Buffer[16];
+    unsigned char Send_Buffer[32];
     ros::NodeHandle n;
     serial::Timeout to = serial::Timeout::simpleTimeout(100);
     ros::Publisher pub_odom;

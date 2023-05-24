@@ -17,21 +17,23 @@ serial::Serial se;
 static void Speed_Trans(AGV_Vel agv_vel)
 {
     // 运动学解算出四个轮子的线速度
-    MOTOR_Parameters[0].target_speed = agv_vel.X - agv_vel.Y - agv_vel.Yaw * (wheel_center_x + wheel_center_y);
-    MOTOR_Parameters[1].target_speed = agv_vel.X + agv_vel.Y + agv_vel.Yaw * (wheel_center_x + wheel_center_y);
-    MOTOR_Parameters[2].target_speed = agv_vel.X - agv_vel.Y + agv_vel.Yaw * (wheel_center_x + wheel_center_y);
-    MOTOR_Parameters[3].target_speed = agv_vel.X + agv_vel.Y - agv_vel.Yaw * (wheel_center_x + wheel_center_y);
+    MOTOR_Parameters[0].target_speed = (float)agv_vel.X - agv_vel.Y - agv_vel.Yaw * (wheel_center_x + wheel_center_y);
+    MOTOR_Parameters[1].target_speed = (float)agv_vel.X + agv_vel.Y + agv_vel.Yaw * (wheel_center_x + wheel_center_y);
+    MOTOR_Parameters[2].target_speed = (float)agv_vel.X - agv_vel.Y + agv_vel.Yaw * (wheel_center_x + wheel_center_y);
+    MOTOR_Parameters[3].target_speed = (float)agv_vel.X + agv_vel.Y - agv_vel.Yaw * (wheel_center_x + wheel_center_y);
+
     for (uint8_t i = 0; i < 4; i++)
     {
         // 要先变为角速度值，再转化为preloader数值,-1要在abs外边
-        MOTOR_Parameters[i].preloader = abs(PI * wheel_r_mm * 1000 / MOTOR_Parameters[i].target_speed) - 1;
-        if (MOTOR_Parameters[i].preloader == 0)
+        MOTOR_Parameters[i].preloader = (short)abs(PI * wheel_r_mm * 1000 / MOTOR_Parameters[i].target_speed) - 1;
+        if (MOTOR_Parameters[i].preloader == -1)
         {
             MOTOR_Parameters[i].preloader = 15000;
         }
         // 转向判断
         MOTOR_Parameters[i].direction_Target = (MOTOR_Parameters[i].target_speed > 0) ? 1 : -1;
     }
+    ROS_INFO_STREAM("X:" << agv_vel.X << "  Y:" << agv_vel.Y << "  Yaw:" << agv_vel.Yaw);
     // std::ostringstream ss;
     // for (int i = 0; i < 4; i++)
     // {
@@ -123,24 +125,23 @@ AGV_Vel STM32_Serial::Recieve_Speed_Trans(uint8_t Recieve_Buffer[])
     // {
     //     MOTOR_Parameters[i].encoder = static_cast<short>(MOTOR_Parameters->kf.filter(MOTOR_Parameters[i].encoder));
     // }
-    agv_vel.X = 2 * PI * wheel_r_mm * (MOTOR_Parameters[0].encoder + MOTOR_Parameters[1].encoder + MOTOR_Parameters[2].encoder + MOTOR_Parameters[3].encoder) / 4.0 / dt / encoder_num;
-    agv_vel.Y = 2 * PI * wheel_r_mm * (-MOTOR_Parameters[0].encoder - MOTOR_Parameters[1].encoder + MOTOR_Parameters[2].encoder + MOTOR_Parameters[3].encoder) / 4.0 / dt / encoder_num;
-    agv_vel.Yaw = 2 * PI * wheel_r_mm * ((-MOTOR_Parameters[0].encoder + MOTOR_Parameters[1].encoder + MOTOR_Parameters[2].encoder - MOTOR_Parameters[3].encoder) / 4.0 / dt / (wheel_center_x + wheel_center_y) / encoder_num);
+    MOTOR_Parameters[3].encoder = (short)MOTOR_Parameters[3].direction_Target*(abs( MOTOR_Parameters[3].target_speed/2/PI/wheel_r_mm*0.1*1000*2));
+    agv_vel.X = 2 * PI * wheel_r_mm * (MOTOR_Parameters[0].encoder + MOTOR_Parameters[1].encoder + MOTOR_Parameters[2].encoder + MOTOR_Parameters[3].encoder) / 4.0 / dt / encoder_num / 2.0;
+    agv_vel.Y = 2 * PI * wheel_r_mm * (-MOTOR_Parameters[0].encoder - MOTOR_Parameters[1].encoder + MOTOR_Parameters[2].encoder + MOTOR_Parameters[3].encoder) / 4.0 / dt / encoder_num / 2.0;
+    agv_vel.Yaw = 2 * PI * wheel_r_mm * ((-MOTOR_Parameters[0].encoder + MOTOR_Parameters[1].encoder + MOTOR_Parameters[2].encoder - MOTOR_Parameters[3].encoder) / 4.0 / dt / 2.0 / (wheel_center_x + wheel_center_y) / encoder_num);
     // 转换为m
     agv_vel.X = int(agv_vel.X / 1000.0 * 100) / 100.0;
     agv_vel.Y = int(agv_vel.Y / 1000.0 * 100) / 100.0;
     agv_vel.Yaw = int(agv_vel.Yaw * 100) / 100.0;
-    // std::ostringstream ss;
-    // for (int i = 0; i < 4; i++)
-    // {
-    //     ss << " "
-    //        << MOTOR_Parameters[i].encoder
-    //        << " "
-    //        << MOTOR_Parameters[i].voltage;
-    // }
-    // ROS_INFO_STREAM(ss.str());
+    std::ostringstream ss;
+    for (int i = 0; i < 4; i++)
+    {
+        ss << " "
+           << MOTOR_Parameters[i].encoder;
+    }
+    ROS_INFO_STREAM(ss.str());
     ROS_INFO_STREAM("X速度为" << agv_vel.X << " Y速度为" << agv_vel.Y << " Z转角为" << agv_vel.Yaw);
-    ROS_INFO_STREAM("1号电机电压为" << MOTOR_Parameters[0].voltage << " 2号电机电压为" << MOTOR_Parameters[1].voltage << " 3号电机电压为" << MOTOR_Parameters[2].voltage << " 4号电机电压为" << MOTOR_Parameters[3].voltage);
+    // ROS_INFO_STREAM("1号电机电压为" << MOTOR_Parameters[0].voltage << " 2号电机电压为" << MOTOR_Parameters[1].voltage << " 3号电机电压为" << MOTOR_Parameters[2].voltage << " 4号电机电压为" << MOTOR_Parameters[3].voltage);
     return agv_vel;
 }
 // STM32设置
@@ -211,7 +212,7 @@ void STM32_Serial::Send_Speed_Trans()
     Send_Buffer[31] = TAIL;
 
     // std::ostringstream ss;
-    // for (int i = 0; i < 16; i++)
+    // for (int i = 0; i < 32; i++)
     // {
     //     ss << " " << hex
     //        << (short)Send_Buffer[i];
