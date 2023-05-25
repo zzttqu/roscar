@@ -297,7 +297,7 @@ void STM32_Serial::Publish_Odom()
     static tf2_ros::TransformBroadcaster odom_broadcaster;
     // 定义tf发布时需要的类型消息
     geometry_msgs::TransformStamped odom_trans;
-    pub_odom = n.advertise<nav_msgs::Odometry>("/odom", 1000);
+    pub_odom = n.advertise<nav_msgs::Odometry>("/odom_raw", 1000);
     nav_msgs::Odometry odom; // 实例化里程计话题数据
 
     ros::Time current_time = ros::Time::now();
