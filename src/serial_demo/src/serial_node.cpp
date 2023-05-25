@@ -34,14 +34,14 @@ static void Speed_Trans(AGV_Vel agv_vel)
         MOTOR_Parameters[i].direction_Target = (MOTOR_Parameters[i].target_speed > 0) ? 1 : -1;
     }
     ROS_INFO_STREAM("X:" << agv_vel.X << "  Y:" << agv_vel.Y << "  Yaw:" << agv_vel.Yaw);
-    std::ostringstream ss;
-    for (int i = 0; i < 4; i++)
-    {
-        ss << "\n"
-           << static_cast<char>('1' + i) << "电机preloader:" << MOTOR_Parameters[i].preloader
-           << "方向为:" << MOTOR_Parameters[i].direction_Target;
-    }
-    ROS_INFO_STREAM(ss.str());
+    // std::ostringstream ss;
+    // for (int i = 0; i < 4; i++)
+    // {
+    //     ss << "\n"
+    //        << static_cast<char>('1' + i) << "电机preloader:" << MOTOR_Parameters[i].preloader
+    //        << "方向为:" << MOTOR_Parameters[i].direction_Target;
+    // }
+    // ROS_INFO_STREAM(ss.str());
 };
 
 void STM32_Serial::Read_Data(uint8_t resBuff[], int buff_size)

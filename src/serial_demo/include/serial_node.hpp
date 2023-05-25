@@ -28,7 +28,7 @@ using namespace std;
 #define PI 3.14159
 #define active_code 'I'
 #define deactive_code 'S'
-#define wheel_r_mm 150.0
+#define wheel_r_mm 76.0
 #define encoder_num 1000.0
 #define dt 0.1
 
