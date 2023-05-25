@@ -23,7 +23,7 @@ int main(int argc, char *argv[])
     {
         if (stm32_Serial.Get_Data())
         {
-            stm32_Serial.Publish_Odom();
+           // stm32_Serial.Publish_Odom();
         }
         // stm32_Serial.Publish_Odom();
         ros::spinOnce();

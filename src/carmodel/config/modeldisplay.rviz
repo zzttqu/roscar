@@ -6,6 +6,8 @@ Panels:
       Expanded:
         - /Global Options1
         - /Status1
+        - /Odometry1
+        - /Odometry1/Status1
         - /Odometry1/Shape1
       Splitter Ratio: 0.5
     Tree Height: 549
@@ -85,7 +87,7 @@ Visualization Manager:
           Scale: 1
           Value: true
         Value: false
-      Enabled: false
+      Enabled: true
       Keep: 10
       Name: Odometry
       Position Tolerance: 0.10000000149011612
@@ -102,12 +104,12 @@ Visualization Manager:
         Value: Arrow
       Topic: /odom
       Unreliable: false
-      Value: false
+      Value: true
     - Alpha: 1
       Autocompute Intensity Bounds: true
       Autocompute Value Bounds:
-        Max Value: 3.3987033367156982
-        Min Value: -1.1921825408935547
+        Max Value: 1.6037380695343018
+        Min Value: -1.3965363502502441
         Value: true
       Axis: Y
       Channel Name: x
@@ -268,7 +270,7 @@ Visualization Manager:
   Global Options:
     Background Color: 48; 48; 48
     Default Light: true
-    Fixed Frame: map
+    Fixed Frame: odom
     Frame Rate: 30
   Name: root
   Tools:
@@ -308,7 +310,7 @@ Visualization Manager:
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 1.0347957611083984
+      Pitch: 1.02979576587677
       Target Frame: <Fixed Frame>
       Yaw: 4.6285719871521
     Saved: ~
