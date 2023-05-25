@@ -11,6 +11,7 @@
   <include file="$(find serial_demo)/launch/my_serial.launch">
     <arg name="port" value="ttyUSB0" />
   </include>
+  <include file="$(find rf2o_laser_odometry)/launch/rf2o_laser_odometry.launch"></include>
   <!-- gmappingslam节点 -->
   <include file="$(find my_assamble_pkg)/launch/my_gmapping.launch">
     <!-- <arg name="ns" value="$(arg second_agv)" /> -->
